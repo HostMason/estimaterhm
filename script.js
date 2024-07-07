@@ -1,103 +1,31 @@
 let fieldCount = 0;
-let pageCount = 0;
 let selectedField = null;
-let currentPage = 1;
-let usePages = true;
-let progressBarType = 'default';
 
-// Settings object
-const settings = {
-    usePages: true,
-    progressBarType: 'default'
-};
+document.addEventListener('DOMContentLoaded', function() {
+    const startBuildingBtn = document.getElementById('start-building');
+    const layoutQuestions = document.getElementById('layout-questions');
+    const builderContainer = document.getElementById('builder-container');
+    const generateEmbedCodeBtn = document.getElementById('generate-embed-code');
+    const embedCode = document.getElementById('embed-code');
 
-// Function to open settings menu
-function openSettings() {
-    const settingsMenu = document.createElement('div');
-    settingsMenu.id = 'settings-menu';
-    settingsMenu.innerHTML = `
-        <h2>Settings</h2>
-        <label>
-            <input type="checkbox" id="use-pages" ${settings.usePages ? 'checked' : ''}>
-            Use Pages
-        </label>
-        <label>
-            Progress Bar Type:
-            <select id="progress-bar-type">
-                <option value="default" ${settings.progressBarType === 'default' ? 'selected' : ''}>Default</option>
-                <option value="percentage" ${settings.progressBarType === 'percentage' ? 'selected' : ''}>Percentage</option>
-                <option value="fraction" ${settings.progressBarType === 'fraction' ? 'selected' : ''}>Fraction</option>
-            </select>
-        </label>
-        <button id="save-settings">Save</button>
-    `;
-    document.body.appendChild(settingsMenu);
+    startBuildingBtn.addEventListener('click', function() {
+        layoutQuestions.style.display = 'none';
+        builderContainer.style.display = 'flex';
+        generateEmbedCodeBtn.style.display = 'block';
+    });
 
-    document.getElementById('save-settings').addEventListener('click', saveSettings);
-}
+    document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
+    generateEmbedCodeBtn.addEventListener('click', generateEmbedCode);
 
-// Function to save settings
-function saveSettings() {
-    settings.usePages = document.getElementById('use-pages').checked;
-    settings.progressBarType = document.getElementById('progress-bar-type').value;
-    usePages = settings.usePages;
-    progressBarType = settings.progressBarType;
-    document.getElementById('settings-menu').remove();
-    renderForm();
-    updateProgressBar();
-}
-
-function addPage() {
-    pageCount++;
-    const page = {
-        id: `page-${pageCount}`,
-        label: `Page ${pageCount}`
-    };
-
-    const listItem = document.createElement('li');
-    listItem.innerHTML = `
-        <div class="page-header">
-            <span class="toggle-btn">▼</span>
-            <span>${page.label}</span>
-            <button class="remove-btn" onclick="removePage('${page.id}')">&times;</button>
-        </div>
-        <ul class="field-list sortable-list" data-page="${page.id}"></ul>
-    `;
-    listItem.setAttribute('data-id', page.id);
-    listItem.querySelector('.page-header').onclick = (e) => {
-        if (e.target.tagName !== 'BUTTON') {
-            togglePage(page.id);
-            selectPage(page);
-        }
-    };
-    document.getElementById('page-list').appendChild(listItem);
-
-    selectPage(page);
     initSortable();
-    updateProgressBar();
-}
-
-function togglePage(pageId) {
-    const pageItem = document.querySelector(`#page-list li[data-id="${pageId}"]`);
-    const fieldList = pageItem.querySelector('.field-list');
-    const toggleBtn = pageItem.querySelector('.toggle-btn');
-    
-    if (fieldList.style.display === 'none') {
-        fieldList.style.display = 'block';
-        toggleBtn.textContent = '▼';
-    } else {
-        fieldList.style.display = 'none';
-        toggleBtn.textContent = '►';
-    }
-}
+});
 
 function addField(type) {
     fieldCount++;
     const field = {
         id: `field-${fieldCount}`,
         type: type,
-        label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${fieldCount}`,
-        page: usePages ? currentPage : 1
+        label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${fieldCount}`
     };
 
     const listItem = document.createElement('li');
@@ -107,74 +35,17 @@ function addField(type) {
     `;
     listItem.setAttribute('data-id', field.id);
     listItem.setAttribute('data-type', field.type);
-    listItem.setAttribute('data-page', field.page);
     listItem.onclick = (e) => {
         if (e.target.tagName !== 'BUTTON') {
             selectField(field);
         }
     };
 
-    if (usePages) {
-        const currentPageElement = document.querySelector(`#page-list li[data-id="page-${currentPage}"]`);
-        const fieldList = currentPageElement.querySelector('.field-list');
-        fieldList.appendChild(listItem);
-    } else {
-        const fieldList = document.querySelector('#field-list');
-        fieldList.appendChild(listItem);
-    }
+    document.getElementById('field-list').appendChild(listItem);
 
     selectField(field);
     toggleFieldMenu();
     initSortable();
-}
-
-function selectPage(page) {
-    currentPage = parseInt(page.id.split('-')[1]);
-    renderForm();
-    highlightSelectedPage(page.id);
-    updateProgressBar();
-}
-
-function highlightSelectedPage(pageId) {
-    const listItems = document.querySelectorAll('#page-list li');
-    listItems.forEach(item => {
-        item.classList.remove('selected');
-        if (item.getAttribute('data-id') === pageId) {
-            item.classList.add('selected');
-        }
-    });
-}
-
-function removePage(pageId) {
-    const listItem = document.querySelector(`#page-list li[data-id="${pageId}"]`);
-    if (listItem) {
-        listItem.remove();
-        // Remove all fields associated with this page
-        const fieldsToRemove = document.querySelectorAll(`#field-list li[data-page="${pageId.split('-')[1]}"]`);
-        fieldsToRemove.forEach(field => field.remove());
-        renderForm();
-        updateProgressBar();
-    }
-}
-
-function updateProgressBar() {
-    const progressBar = document.getElementById('progress-bar');
-    const progressBarContainer = document.getElementById('progress-bar-container');
-    const totalPages = usePages ? document.querySelectorAll('#page-list li').length : 1;
-    const progress = (currentPage / totalPages) * 100;
-
-    progressBar.style.width = `${progress}%`;
-
-    switch (progressBarType) {
-        case 'percentage':
-            progressBarContainer.textContent = `${Math.round(progress)}%`;
-            break;
-        case 'fraction':
-            progressBarContainer.textContent = `${currentPage} / ${totalPages}`;
-            break;
-        default:
-            progressBarContainer.textContent = '';
-    }
 }
 
 function toggleFieldMenu() {
@@ -202,8 +73,7 @@ function renderForm() {
     const formPreview = document.getElementById('custom-form');
     formPreview.innerHTML = '';
 
-    const currentPageElement = document.querySelector(`#page-list li[data-id="page-${currentPage}"]`);
-    const fields = Array.from(currentPageElement.querySelector('.field-list').children);
+    const fields = Array.from(document.getElementById('field-list').children);
     
     fields.forEach(listItem => {
         const field = {
@@ -222,35 +92,10 @@ function renderForm() {
         formPreview.appendChild(fieldElement);
     });
 
-    const totalPages = document.querySelectorAll('#page-list > li').length;
-    if (currentPage < totalPages) {
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.onclick = () => {
-            currentPage++;
-            renderForm();
-            updateProgressBar();
-        };
-        formPreview.appendChild(nextButton);
-    }
-
-    if (currentPage > 1) {
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.onclick = () => {
-            currentPage--;
-            renderForm();
-            updateProgressBar();
-        };
-        formPreview.insertBefore(prevButton, formPreview.firstChild);
-    }
-
-    if (currentPage === totalPages) {
-        const submitButton = document.createElement('button');
-        submitButton.textContent = 'Submit';
-        submitButton.onclick = submitForm;
-        formPreview.appendChild(submitButton);
-    }
+    const submitButton = document.createElement('button');
+    submitButton.textContent = 'Submit';
+    submitButton.type = 'submit';
+    formPreview.appendChild(submitButton);
 }
 
 function removeField(fieldId) {
@@ -265,12 +110,12 @@ function getInputHtml(type, id) {
     switch(type) {
         case 'text':
             return `<input type="text" id="${id}" name="${id}">`;
+        case 'textarea':
+            return `<textarea id="${id}" name="${id}"></textarea>`;
         case 'email':
             return `<input type="email" id="${id}" name="${id}">`;
         case 'number':
             return `<input type="number" id="${id}" name="${id}">`;
-        case 'textarea':
-            return `<textarea id="${id}" name="${id}"></textarea>`;
         case 'select':
             return `
                 <select id="${id}" name="${id}">
@@ -280,61 +125,67 @@ function getInputHtml(type, id) {
                 </select>
             `;
         case 'checkbox':
-            return `<input type="checkbox" id="${id}" name="${id}">`;
+            return `
+                <div>
+                    <input type="checkbox" id="${id}_1" name="${id}" value="option1">
+                    <label for="${id}_1">Option 1</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="${id}_2" name="${id}" value="option2">
+                    <label for="${id}_2">Option 2</label>
+                </div>
+            `;
         case 'radio':
             return `
-                <input type="radio" id="${id}_1" name="${id}" value="option1">
-                <label for="${id}_1">Option 1</label>
-                <input type="radio" id="${id}_2" name="${id}" value="option2">
-                <label for="${id}_2">Option 2</label>
+                <div>
+                    <input type="radio" id="${id}_1" name="${id}" value="option1">
+                    <label for="${id}_1">Option 1</label>
+                </div>
+                <div>
+                    <input type="radio" id="${id}_2" name="${id}" value="option2">
+                    <label for="${id}_2">Option 2</label>
+                </div>
             `;
+        case 'name':
+            return `
+                <input type="text" id="${id}_first" name="${id}_first" placeholder="First Name">
+                <input type="text" id="${id}_last" name="${id}_last" placeholder="Last Name">
+            `;
+        case 'phone':
+            return `<input type="tel" id="${id}" name="${id}">`;
+        case 'date':
+            return `<input type="date" id="${id}" name="${id}">`;
+        case 'file':
+            return `<input type="file" id="${id}" name="${id}">`;
+        case 'website':
+            return `<input type="url" id="${id}" name="${id}">`;
+        case 'address':
+            return `
+                <input type="text" id="${id}_street" name="${id}_street" placeholder="Street Address">
+                <input type="text" id="${id}_city" name="${id}_city" placeholder="City">
+                <input type="text" id="${id}_state" name="${id}_state" placeholder="State">
+                <input type="text" id="${id}_zip" name="${id}_zip" placeholder="ZIP Code">
+            `;
+        default:
+            return `<input type="text" id="${id}" name="${id}">`;
     }
 }
 
-function submitForm() {
-    const formData = new FormData(document.getElementById('custom-form'));
-    
-    // Use AJAX to submit the form
-    fetch('/submit-form', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        alert('Form submitted successfully!');
-        // Reset the form or redirect to a thank you page
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while submitting the form.');
-    });
-}
-
 function generateEmbedCode() {
+    const formType = document.getElementById('form-type').value;
+    const formStyle = document.getElementById('form-style').value;
     const formHtml = document.getElementById('custom-form').innerHTML;
     const embedCode = `
-<div id="embedded-form-container">
-    <div id="progress-bar-container">
-        <div id="progress-bar"></div>
-    </div>
+<div id="embedded-form-container" class="${formStyle}-style ${formType}-form">
     <form id="embedded-form">
         ${formHtml}
     </form>
 </div>
 <script>
 (function() {
-    let currentPage = 1;
-    const totalPages = ${pageCount};
-
-    function updateProgressBar() {
-        const progressBar = document.getElementById('progress-bar');
-        const progress = (currentPage / totalPages) * 100;
-        progressBar.style.width = \`\${progress}%\`;
-    }
-
-    function submitForm(e) {
+    document.getElementById('embedded-form').onsubmit = function(e) {
         e.preventDefault();
-        const formData = new FormData(document.getElementById('embedded-form'));
+        const formData = new FormData(this);
         
         fetch('/submit-form', {
             method: 'POST',
@@ -348,52 +199,41 @@ function generateEmbedCode() {
             console.error('Error:', error);
             alert('An error occurred while submitting the form.');
         });
-    }
-
-    document.getElementById('embedded-form').onsubmit = submitForm;
-    updateProgressBar();
+    };
 })();
 </script>
     `;
     document.getElementById('embed-code').value = embedCode;
+    document.getElementById('embed-code').style.display = 'block';
 }
 
-// Add this at the end of the file
-document.getElementById('add-page-btn').addEventListener('click', addPage);
-
 function initSortable() {
-    const pageList = document.getElementById('page-list');
-    const fieldLists = document.querySelectorAll('.field-list');
+    const fieldList = document.getElementById('field-list');
     
-    initSortableList(pageList);
-    fieldLists.forEach(initSortableList);
+    let draggedItem = null;
 
-    function initSortableList(list) {
-        let draggedItem = null;
+    fieldList.addEventListener('dragstart', function(e) {
+        draggedItem = e.target;
+        setTimeout(() => {
+            e.target.classList.add('dragging');
+        }, 0);
+    });
 
-        list.addEventListener('dragstart', function(e) {
-            draggedItem = e.target;
-            setTimeout(() => {
-                e.target.classList.add('dragging');
-            }, 0);
-        });
+    fieldList.addEventListener('dragend', function(e) {
+        e.target.classList.remove('dragging');
+        renderForm();
+    });
 
-        list.addEventListener('dragend', function(e) {
-            e.target.classList.remove('dragging');
-            renderForm();
-        });
-
-        list.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            const afterElement = getDragAfterElement(list, e.clientY);
-            const draggable = document.querySelector('.dragging');
-            if (afterElement == null) {
-                list.appendChild(draggable);
-            } else {
-                list.insertBefore(draggable, afterElement);
-            }
-        });
-    }
+    fieldList.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(fieldList, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if (afterElement == null) {
+            fieldList.appendChild(draggable);
+        } else {
+            fieldList.insertBefore(draggable, afterElement);
+        }
+    });
 
     function getDragAfterElement(container, y) {
         const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
@@ -409,15 +249,8 @@ function initSortable() {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    const listItems = document.querySelectorAll('#page-list > li, .field-list > li');
+    const listItems = document.querySelectorAll('#field-list > li');
     listItems.forEach(item => {
         item.setAttribute('draggable', 'true');
     });
 }
-
-// Apply default theme on page load
-document.addEventListener('DOMContentLoaded', function() {
-    applyTheme(currentTheme);
-    document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
-    initSortable();
-});
