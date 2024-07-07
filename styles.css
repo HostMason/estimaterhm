@@ -60,9 +60,44 @@ body {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
+#field-menu {
+    position: relative;
+}
+
 #add-field-btn {
     width: 100%;
     margin-top: 10px;
+}
+
+#field-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--background-color);
+    border: 1px solid var(--accent-color);
+    border-top: none;
+    z-index: 10;
+}
+
+#field-options button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 5px 10px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+#field-options button:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.hidden {
+    display: none;
 }
 
 #form-preview {

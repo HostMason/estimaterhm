@@ -1,15 +1,12 @@
 let fieldCount = 0;
 let selectedField = null;
 
-function addField() {
-    const type = prompt("Enter field type (text, email, number, textarea, select, checkbox, radio):");
-    if (!type) return;
-
+function addField(type) {
     fieldCount++;
     const field = {
         id: `field-${fieldCount}`,
         type: type,
-        label: `Field ${fieldCount}`
+        label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${fieldCount}`
     };
 
     const listItem = document.createElement('li');
@@ -18,6 +15,12 @@ function addField() {
     document.getElementById('field-list').appendChild(listItem);
 
     selectField(field);
+    toggleFieldMenu();
+}
+
+function toggleFieldMenu() {
+    const fieldOptions = document.getElementById('field-options');
+    fieldOptions.classList.toggle('hidden');
 }
 
 function selectField(field) {
@@ -109,5 +112,5 @@ document.getElementById('embedded-form').onsubmit = function(e) {
 // Apply default theme on page load
 document.addEventListener('DOMContentLoaded', function() {
     applyTheme(currentTheme);
-    document.getElementById('add-field-btn').addEventListener('click', addField);
+    document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
 });

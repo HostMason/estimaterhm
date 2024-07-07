@@ -17,7 +17,18 @@
             <div id="hierarchy-tree">
                 <h2>Form Structure</h2>
                 <ul id="field-list"></ul>
-                <button id="add-field-btn">Add Field</button>
+                <div id="field-menu">
+                    <button id="add-field-btn">Add Field</button>
+                    <div id="field-options" class="hidden">
+                        <button onclick="addField('text')">Text</button>
+                        <button onclick="addField('email')">Email</button>
+                        <button onclick="addField('number')">Number</button>
+                        <button onclick="addField('textarea')">Textarea</button>
+                        <button onclick="addField('select')">Select</button>
+                        <button onclick="addField('checkbox')">Checkbox</button>
+                        <button onclick="addField('radio')">Radio</button>
+                    </div>
+                </div>
             </div>
             <div id="form-preview">
                 <form id="custom-form"></form>
