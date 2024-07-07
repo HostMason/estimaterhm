@@ -25,15 +25,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
+    document.getElementById('add-page-btn').addEventListener('click', addPage);
     generateEmbedCodeBtn.addEventListener('click', generateEmbedCode);
 
     initSortable();
 });
 
 function updateFormBasedOnSettings() {
-    // Implement the logic to update the form based on the settings
     console.log('Form settings updated:', formSettings);
-    // You can add more logic here to change the form structure based on the settings
+    
+    const addPageBtn = document.getElementById('add-page-btn');
+    if (formSettings.enablePages) {
+        addPageBtn.style.display = 'inline-block';
+    } else {
+        addPageBtn.style.display = 'none';
+    }
+    
+    // Additional logic to change the form structure based on the settings can be added here
+}
+
+function addPage() {
+    fieldCount++;
+    const pageId = `page-${fieldCount}`;
+    const listItem = document.createElement('li');
+    listItem.innerHTML = `
+        <span>Page ${fieldCount}</span>
+        <button class="remove-btn" onclick="removePage('${pageId}')">&times;</button>
+    `;
+    listItem.setAttribute('data-id', pageId);
+    listItem.setAttribute('data-type', 'page');
+    document.getElementById('field-list').appendChild(listItem);
+    renderForm();
+}
+
+function removePage(pageId) {
+    const listItem = document.querySelector(`#field-list li[data-id="${pageId}"]`);
+    if (listItem) {
+        listItem.remove();
+        renderForm();
+    }
 }
 
 function addField(type) {
