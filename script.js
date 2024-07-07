@@ -26,6 +26,17 @@ function toggleFieldMenu() {
 function selectField(field) {
     selectedField = field;
     renderForm();
+    highlightSelectedField(field.id);
+}
+
+function highlightSelectedField(fieldId) {
+    const listItems = document.querySelectorAll('#field-list li');
+    listItems.forEach(item => {
+        item.classList.remove('selected');
+        if (item.textContent.toLowerCase().includes(fieldId)) {
+            item.classList.add('selected');
+        }
+    });
 }
 
 function renderForm() {
