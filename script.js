@@ -119,21 +119,53 @@ function renderForm() {
 
     const fields = Array.from(document.getElementById('field-list').children);
     fields.forEach(listItem => {
-        const field = {
-            id: listItem.getAttribute('data-id'),
-            type: listItem.getAttribute('data-type'),
-            label: listItem.querySelector('span').textContent.split(' (')[0]
-        };
+        if (parseInt(listItem.getAttribute('data-page')) === currentPage) {
+            const field = {
+                id: listItem.getAttribute('data-id'),
+                type: listItem.getAttribute('data-type'),
+                label: listItem.querySelector('span').textContent.split(' (')[0]
+            };
 
-        const fieldElement = document.createElement('div');
-        fieldElement.className = 'form-field';
-        fieldElement.id = `field-block-${field.id}`;
-        fieldElement.innerHTML = `
-            <label for="${field.id}">${field.label}:</label>
-            ${getInputHtml(field.type, field.id)}
-        `;
-        formPreview.appendChild(fieldElement);
+            const fieldElement = document.createElement('div');
+            fieldElement.className = 'form-field';
+            fieldElement.id = `field-block-${field.id}`;
+            fieldElement.innerHTML = `
+                <label for="${field.id}">${field.label}:</label>
+                ${getInputHtml(field.type, field.id)}
+            `;
+            formPreview.appendChild(fieldElement);
+        }
     });
+
+    const totalPages = document.querySelectorAll('#page-list li').length;
+    if (currentPage < totalPages) {
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.onclick = () => {
+            currentPage++;
+            renderForm();
+            updateProgressBar();
+        };
+        formPreview.appendChild(nextButton);
+    }
+
+    if (currentPage > 1) {
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.onclick = () => {
+            currentPage--;
+            renderForm();
+            updateProgressBar();
+        };
+        formPreview.insertBefore(prevButton, formPreview.firstChild);
+    }
+
+    if (currentPage === totalPages) {
+        const submitButton = document.createElement('button');
+        submitButton.textContent = 'Submit';
+        submitButton.onclick = submitForm;
+        formPreview.appendChild(submitButton);
+    }
 }
 
 function removeField(fieldId) {
@@ -174,23 +206,75 @@ function getInputHtml(type, id) {
     }
 }
 
+function submitForm() {
+    const formData = new FormData(document.getElementById('custom-form'));
+    
+    // Use AJAX to submit the form
+    fetch('/submit-form', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Form submitted successfully!');
+        // Reset the form or redirect to a thank you page
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while submitting the form.');
+    });
+}
+
 function generateEmbedCode() {
     const formHtml = document.getElementById('custom-form').innerHTML;
     const embedCode = `
-<form id="embedded-form">
-    ${formHtml}
-    <button type="submit">Submit</button>
-</form>
+<div id="embedded-form-container">
+    <div id="progress-bar-container">
+        <div id="progress-bar"></div>
+    </div>
+    <form id="embedded-form">
+        ${formHtml}
+    </form>
+</div>
 <script>
-document.getElementById('embedded-form').onsubmit = function(e) {
-    e.preventDefault();
-    // Add your form submission logic here
-    alert('Form submitted!');
-};
+(function() {
+    let currentPage = 1;
+    const totalPages = ${pageCount};
+
+    function updateProgressBar() {
+        const progressBar = document.getElementById('progress-bar');
+        const progress = (currentPage / totalPages) * 100;
+        progressBar.style.width = \`\${progress}%\`;
+    }
+
+    function submitForm(e) {
+        e.preventDefault();
+        const formData = new FormData(document.getElementById('embedded-form'));
+        
+        fetch('/submit-form', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Form submitted successfully!');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting the form.');
+        });
+    }
+
+    document.getElementById('embedded-form').onsubmit = submitForm;
+    updateProgressBar();
+})();
 </script>
     `;
     document.getElementById('embed-code').value = embedCode;
 }
+
+// Add this at the end of the file
+document.getElementById('add-page-btn').addEventListener('click', addPage);
 
 function initSortable() {
     const fieldList = document.getElementById('field-list');
