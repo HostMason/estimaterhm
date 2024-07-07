@@ -244,6 +244,7 @@ function addField(type) {
     `;
     listItem.setAttribute('data-id', field.id);
     listItem.setAttribute('data-type', field.type);
+    listItem.setAttribute('draggable', 'true');
     listItem.onclick = (e) => {
         if (e.target.tagName !== 'BUTTON') {
             selectField(field);
@@ -253,6 +254,11 @@ function addField(type) {
     const activePage = document.querySelector('#field-list li[data-type="page"] .page-fields');
     if (activePage) {
         activePage.appendChild(listItem);
+    } else if (formSettings.enablePages) {
+        // If pages are enabled but no page exists, create a new page
+        addPage();
+        const newPage = document.querySelector('#field-list li[data-type="page"] .page-fields');
+        newPage.appendChild(listItem);
     } else {
         document.getElementById('field-list').appendChild(listItem);
     }
@@ -426,12 +432,22 @@ function initSortable() {
 
     fieldList.addEventListener('dragover', function(e) {
         e.preventDefault();
-        const afterElement = getDragAfterElement(fieldList, e.clientY);
         const draggable = document.querySelector('.dragging');
-        if (afterElement == null) {
-            fieldList.appendChild(draggable);
+        if (!draggable) return;
+
+        let container;
+        if (formSettings.enablePages) {
+            container = draggable.closest('.page-fields') || draggable.closest('#field-list');
         } else {
-            fieldList.insertBefore(draggable, afterElement);
+            container = fieldList;
+        }
+
+        const afterElement = getDragAfterElement(container, e.clientY);
+        
+        if (afterElement == null) {
+            container.appendChild(draggable);
+        } else {
+            container.insertBefore(draggable, afterElement);
         }
     });
 
@@ -451,6 +467,8 @@ function initSortable() {
 
     const listItems = document.querySelectorAll('#field-list > li, .page-fields > li');
     listItems.forEach(item => {
-        item.setAttribute('draggable', 'true');
+        if (item.getAttribute('data-type') !== 'page') {
+            item.setAttribute('draggable', 'true');
+        }
     });
 }
