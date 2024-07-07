@@ -1,12 +1,21 @@
 let fieldCount = 0;
 let selectedField = null;
 
+let formSettings = {
+    enablePages: false,
+    progressBarType: 'none'
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const startBuildingBtn = document.getElementById('start-building');
     const layoutQuestions = document.getElementById('layout-questions');
     const builderContainer = document.getElementById('builder-container');
     const generateEmbedCodeBtn = document.getElementById('generate-embed-code');
     const embedCode = document.getElementById('embed-code');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const saveSettingsBtn = document.getElementById('save-settings');
+    const closeSettingsBtn = document.getElementById('close-settings');
 
     startBuildingBtn.addEventListener('click', function() {
         layoutQuestions.style.display = 'none';
@@ -17,8 +26,35 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
     generateEmbedCodeBtn.addEventListener('click', generateEmbedCode);
 
+    settingsBtn.addEventListener('click', function() {
+        settingsModal.style.display = 'block';
+    });
+
+    saveSettingsBtn.addEventListener('click', function() {
+        formSettings.enablePages = document.getElementById('enable-pages').checked;
+        formSettings.progressBarType = document.getElementById('progress-bar-type').value;
+        settingsModal.style.display = 'none';
+        updateFormBasedOnSettings();
+    });
+
+    closeSettingsBtn.addEventListener('click', function() {
+        settingsModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target == settingsModal) {
+            settingsModal.style.display = 'none';
+        }
+    });
+
     initSortable();
 });
+
+function updateFormBasedOnSettings() {
+    // Implement the logic to update the form based on the settings
+    console.log('Form settings updated:', formSettings);
+    // You can add more logic here to change the form structure based on the settings
+}
 
 function addField(type) {
     fieldCount++;
@@ -177,13 +213,25 @@ function generateEmbedCode() {
     const formHtml = document.getElementById('custom-form').innerHTML;
     const embedCode = `
 <div id="embedded-form-container" class="${formStyle}-style ${formType}-form">
-    <form id="embedded-form">
+    <form id="embedded-form" data-enable-pages="${formSettings.enablePages}" data-progress-bar-type="${formSettings.progressBarType}">
         ${formHtml}
     </form>
 </div>
 <script>
 (function() {
-    document.getElementById('embedded-form').onsubmit = function(e) {
+    const form = document.getElementById('embedded-form');
+    const enablePages = form.dataset.enablePages === 'true';
+    const progressBarType = form.dataset.progressBarType;
+
+    if (enablePages) {
+        // Implement pagination logic here
+    }
+
+    if (progressBarType !== 'none') {
+        // Implement progress bar logic here
+    }
+
+    form.onsubmit = function(e) {
         e.preventDefault();
         const formData = new FormData(this);
         
