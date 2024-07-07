@@ -1,4 +1,5 @@
 let fieldCount = 0;
+let pageCount = 0;
 let selectedField = null;
 
 let formSettings = {
@@ -41,6 +42,9 @@ function updateFormBasedOnSettings() {
     const addPageBtn = document.getElementById('add-page-btn');
     if (formSettings.enablePages) {
         addPageBtn.style.display = 'inline-block';
+        if (document.querySelectorAll('#field-list li[data-type="page"]').length === 0) {
+            addPage();
+        }
     } else {
         addPageBtn.style.display = 'none';
     }
@@ -87,12 +91,17 @@ function updateProgressBarDisplay() {
 }
 
 function addPage() {
-    fieldCount++;
-    const pageId = `page-${fieldCount}`;
+    pageCount++;
+    const pageId = `page-${pageCount}`;
     const listItem = document.createElement('li');
     listItem.innerHTML = `
-        <span>Page ${fieldCount}</span>
-        <button class="remove-btn" onclick="removePage('${pageId}')">&times;</button>
+        <div class="page-header">
+            <span class="page-title" contenteditable="true">Page ${pageCount}</span>
+            <button class="minimize-btn" onclick="togglePageMinimize('${pageId}')">-</button>
+            <button class="config-btn" onclick="configPage('${pageId}')">⚙</button>
+            <button class="remove-btn" onclick="removePage('${pageId}')">&times;</button>
+        </div>
+        <ul class="page-fields" id="${pageId}-fields"></ul>
     `;
     listItem.setAttribute('data-id', pageId);
     listItem.setAttribute('data-type', 'page');
@@ -104,8 +113,36 @@ function removePage(pageId) {
     const listItem = document.querySelector(`#field-list li[data-id="${pageId}"]`);
     if (listItem) {
         listItem.remove();
+        updatePageNumbers();
         renderForm();
     }
+}
+
+function updatePageNumbers() {
+    const pages = document.querySelectorAll('#field-list li[data-type="page"]');
+    pages.forEach((page, index) => {
+        const pageTitle = page.querySelector('.page-title');
+        if (pageTitle.textContent.startsWith('Page ')) {
+            pageTitle.textContent = `Page ${index + 1}`;
+        }
+    });
+}
+
+function togglePageMinimize(pageId) {
+    const pageFields = document.getElementById(`${pageId}-fields`);
+    const minimizeBtn = document.querySelector(`#field-list li[data-id="${pageId}"] .minimize-btn`);
+    if (pageFields.style.display === 'none') {
+        pageFields.style.display = 'block';
+        minimizeBtn.textContent = '-';
+    } else {
+        pageFields.style.display = 'none';
+        minimizeBtn.textContent = '+';
+    }
+}
+
+function configPage(pageId) {
+    // Implement page configuration logic here
+    console.log(`Configuring page: ${pageId}`);
 }
 
 function renderForm() {
@@ -114,63 +151,69 @@ function renderForm() {
 
     updateProgressBar();
 
-    const fields = Array.from(document.getElementById('field-list').children);
-    let currentPageFields = [];
-    let pageCount = 0;
-
-    fields.forEach((listItem, index) => {
-        const field = {
-            id: listItem.getAttribute('data-id'),
-            type: listItem.getAttribute('data-type'),
-            label: listItem.querySelector('span').textContent.split(' (')[0]
-        };
-
-        if (field.type === 'page' || index === fields.length - 1) {
-            pageCount++;
-            if (pageCount === currentPage) {
-                renderPage(currentPageFields, formPreview, pageCount === 1, index === fields.length - 1);
-            }
-            currentPageFields = [];
-        } else {
-            currentPageFields.push(field);
-        }
+    const pages = document.querySelectorAll('#field-list li[data-type="page"]');
+    
+    pages.forEach((page, pageIndex) => {
+        const pageId = page.getAttribute('data-id');
+        const pageTitle = page.querySelector('.page-title').textContent;
+        const pageFields = Array.from(page.querySelectorAll('.page-fields li'));
+        
+        const pageElement = document.createElement('div');
+        pageElement.className = 'form-page';
+        pageElement.id = `form-${pageId}`;
+        pageElement.style.display = pageIndex + 1 === currentPage ? 'block' : 'none';
+        
+        const pageTitleElement = document.createElement('h2');
+        pageTitleElement.textContent = pageTitle;
+        pageElement.appendChild(pageTitleElement);
+        
+        pageFields.forEach(field => {
+            const fieldElement = createFieldElement(field);
+            pageElement.appendChild(fieldElement);
+        });
+        
+        formPreview.appendChild(pageElement);
     });
 
-    if (pageCount === 0) {
-        renderPage(currentPageFields, formPreview, true, true);
-    }
+    addNavigationButtons(formPreview);
 }
 
-function renderPage(fields, formPreview, isFirstPage, isLastPage) {
-    fields.forEach(field => {
-        const fieldElement = document.createElement('div');
-        fieldElement.className = 'form-field';
-        fieldElement.id = `field-block-${field.id}`;
-        fieldElement.innerHTML = `
-            <label for="${field.id}">${field.label}:</label>
-            ${getInputHtml(field.type, field.id)}
-        `;
-        formPreview.appendChild(fieldElement);
-    });
+function createFieldElement(field) {
+    const fieldId = field.getAttribute('data-id');
+    const fieldType = field.getAttribute('data-type');
+    const fieldLabel = field.querySelector('span').textContent;
 
+    const fieldElement = document.createElement('div');
+    fieldElement.className = 'form-field';
+    fieldElement.id = `field-block-${fieldId}`;
+    fieldElement.innerHTML = `
+        <label for="${fieldId}">${fieldLabel}:</label>
+        ${getInputHtml(fieldType, fieldId)}
+    `;
+    return fieldElement;
+}
+
+function addNavigationButtons(formPreview) {
     const navigationButtons = document.createElement('div');
     navigationButtons.className = 'form-navigation';
 
-    if (!isFirstPage) {
+    const totalPages = document.querySelectorAll('#field-list li[data-type="page"]').length;
+
+    if (currentPage > 1) {
         const prevButton = document.createElement('button');
         prevButton.textContent = 'Previous';
         prevButton.onclick = () => navigatePage(-1);
         navigationButtons.appendChild(prevButton);
     }
 
-    if (!isLastPage) {
+    if (currentPage < totalPages) {
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
         nextButton.onclick = () => navigatePage(1);
         navigationButtons.appendChild(nextButton);
     }
 
-    if (isLastPage) {
+    if (currentPage === totalPages) {
         const submitButton = document.createElement('button');
         submitButton.textContent = 'Submit';
         submitButton.type = 'submit';
@@ -195,7 +238,8 @@ function addField(type) {
 
     const listItem = document.createElement('li');
     listItem.innerHTML = `
-        <span>${field.label} (${field.type})</span>
+        <span contenteditable="true">${field.label}</span>
+        <button class="config-btn" onclick="configField('${field.id}')">⚙</button>
         <button class="remove-btn" onclick="removeField('${field.id}')">&times;</button>
     `;
     listItem.setAttribute('data-id', field.id);
@@ -206,11 +250,21 @@ function addField(type) {
         }
     };
 
-    document.getElementById('field-list').appendChild(listItem);
+    const activePage = document.querySelector('#field-list li[data-type="page"] .page-fields');
+    if (activePage) {
+        activePage.appendChild(listItem);
+    } else {
+        document.getElementById('field-list').appendChild(listItem);
+    }
 
     selectField(field);
     toggleFieldMenu();
     initSortable();
+}
+
+function configField(fieldId) {
+    // Implement field configuration logic here
+    console.log(`Configuring field: ${fieldId}`);
 }
 
 function toggleFieldMenu() {
@@ -232,35 +286,6 @@ function highlightSelectedField(fieldId) {
             item.classList.add('selected');
         }
     });
-}
-
-function renderForm() {
-    const formPreview = document.getElementById('custom-form');
-    formPreview.innerHTML = '';
-
-    const fields = Array.from(document.getElementById('field-list').children);
-    
-    fields.forEach(listItem => {
-        const field = {
-            id: listItem.getAttribute('data-id'),
-            type: listItem.getAttribute('data-type'),
-            label: listItem.querySelector('span').textContent.split(' (')[0]
-        };
-
-        const fieldElement = document.createElement('div');
-        fieldElement.className = 'form-field';
-        fieldElement.id = `field-block-${field.id}`;
-        fieldElement.innerHTML = `
-            <label for="${field.id}">${field.label}:</label>
-            ${getInputHtml(field.type, field.id)}
-        `;
-        formPreview.appendChild(fieldElement);
-    });
-
-    const submitButton = document.createElement('button');
-    submitButton.textContent = 'Submit';
-    submitButton.type = 'submit';
-    formPreview.appendChild(submitButton);
 }
 
 function removeField(fieldId) {
@@ -424,7 +449,7 @@ function initSortable() {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    const listItems = document.querySelectorAll('#field-list > li');
+    const listItems = document.querySelectorAll('#field-list > li, .page-fields > li');
     listItems.forEach(item => {
         item.setAttribute('draggable', 'true');
     });
