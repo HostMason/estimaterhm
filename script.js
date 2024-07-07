@@ -12,7 +12,17 @@ function initFormBuilder() {
 // Set up all event listeners
 function setupEventListeners() {
     document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
+    document.getElementById('add-page-btn').addEventListener('click', addPage);
     document.getElementById('generate-embed-code').addEventListener('click', generateEmbedCode);
+}
+
+// Add a new page to the form
+function addPage() {
+    const page = createFieldObject('page');
+    const listItem = createFieldListItem(page);
+    document.getElementById('field-list').appendChild(listItem);
+    renderForm();
+    initSortable();
 }
 
 // Initialize the form builder when the DOM is loaded
@@ -118,29 +128,63 @@ function createFieldObject(type) {
 // Create a list item for the field
 function createFieldListItem(field) {
     const listItem = document.createElement('li');
+    listItem.className = 'field-item';
     if (field.type === 'page') {
         listItem.innerHTML = `
-            <span contenteditable="true">${field.label}</span>
-            <button class="config-btn" onclick="configField('${field.id}')">⚙</button>
-            <button class="remove-btn" onclick="removeField('${field.id}')">&times;</button>
-            <ul class="page-fields"></ul>
+            <div class="field-header">
+                <span class="field-icon">📄</span>
+                <span class="field-label" contenteditable="true">${field.label}</span>
+                <div class="field-actions">
+                    <button class="config-btn" onclick="configField('${field.id}')">⚙</button>
+                    <button class="remove-btn" onclick="removeField('${field.id}')">&times;</button>
+                </div>
+            </div>
+            <ul class="page-fields sortable-list"></ul>
         `;
     } else {
         listItem.innerHTML = `
-            <span contenteditable="true">${field.label}</span>
-            <button class="config-btn" onclick="configField('${field.id}')">⚙</button>
-            <button class="remove-btn" onclick="removeField('${field.id}')">&times;</button>
+            <div class="field-header">
+                <span class="field-icon">${getFieldIcon(field.type)}</span>
+                <span class="field-label" contenteditable="true">${field.label}</span>
+                <div class="field-actions">
+                    <button class="config-btn" onclick="configField('${field.id}')">⚙</button>
+                    <button class="remove-btn" onclick="removeField('${field.id}')">&times;</button>
+                </div>
+            </div>
         `;
     }
     listItem.setAttribute('data-id', field.id);
     listItem.setAttribute('data-type', field.type);
     listItem.setAttribute('draggable', 'true');
-    listItem.onclick = (e) => {
-        if (e.target.tagName !== 'BUTTON') {
-            selectField(field);
-        }
+    listItem.querySelector('.field-label').onclick = (e) => {
+        selectField(field);
     };
     return listItem;
+}
+
+function getFieldIcon(type) {
+    const icons = {
+        name: '👤',
+        email: '✉️',
+        phone: '📞',
+        address: '🏠',
+        website: '🌐',
+        text: 'Aa',
+        textarea: '📝',
+        number: '🔢',
+        radio: '⚪',
+        checkbox: '☑️',
+        calculations: '🧮',
+        select: '▼',
+        date: '📅',
+        time: '⏰',
+        html: '🖥️',
+        hidden: '👁️',
+        section: '📂',
+        fieldgroup: '🗃️',
+        slider: '🎚️'
+    };
+    return icons[type] || 'Aa';
 }
 
 // Configure a field
