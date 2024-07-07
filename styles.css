@@ -46,16 +46,46 @@ body {
     padding: 20px;
 }
 
-#field-list {
+#page-list {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-#field-list li {
+#page-list > li {
+    margin-bottom: 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.page-header {
+    padding: 8px 12px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header:hover {
+    background-color: #d0d0d0;
+}
+
+.toggle-btn {
+    margin-right: 5px;
+}
+
+.field-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.field-list li {
     margin-bottom: 5px;
     padding: 8px 12px;
-    background-color: #f0f0f0;
+    background-color: #f8f8f8;
     border-radius: 4px;
     cursor: move;
     transition: all 0.3s ease;
@@ -64,16 +94,16 @@ body {
     align-items: center;
 }
 
-#field-list li:hover {
-    background-color: #e0e0e0;
+.field-list li:hover {
+    background-color: #e8e8e8;
 }
 
-#field-list li.selected {
+.field-list li.selected {
     background-color: var(--accent-color);
     color: white;
 }
 
-#field-list li .remove-btn {
+.field-list li .remove-btn {
     background-color: transparent;
     border: none;
     color: #ff4444;
@@ -82,7 +112,7 @@ body {
     padding: 0 5px;
 }
 
-#field-list li .remove-btn:hover {
+.field-list li .remove-btn:hover {
     color: #ff0000;
 }
 

@@ -12,13 +12,17 @@ function addPage() {
 
     const listItem = document.createElement('li');
     listItem.innerHTML = `
-        <span>${page.label}</span>
-        <button class="remove-btn" onclick="removePage('${page.id}')">&times;</button>
+        <div class="page-header">
+            <span class="toggle-btn">▼</span>
+            <span>${page.label}</span>
+            <button class="remove-btn" onclick="removePage('${page.id}')">&times;</button>
+        </div>
+        <ul class="field-list sortable-list" data-page="${page.id}"></ul>
     `;
     listItem.setAttribute('data-id', page.id);
-    listItem.onclick = (e) => {
+    listItem.querySelector('.page-header').onclick = (e) => {
         if (e.target.tagName !== 'BUTTON') {
-            selectPage(page);
+            togglePage(page.id);
         }
     };
     document.getElementById('page-list').appendChild(listItem);
@@ -26,6 +30,20 @@ function addPage() {
     selectPage(page);
     initSortable();
     updateProgressBar();
+}
+
+function togglePage(pageId) {
+    const pageItem = document.querySelector(`#page-list li[data-id="${pageId}"]`);
+    const fieldList = pageItem.querySelector('.field-list');
+    const toggleBtn = pageItem.querySelector('.toggle-btn');
+    
+    if (fieldList.style.display === 'none') {
+        fieldList.style.display = 'block';
+        toggleBtn.textContent = '▼';
+    } else {
+        fieldList.style.display = 'none';
+        toggleBtn.textContent = '►';
+    }
 }
 
 function addField(type) {
@@ -50,7 +68,9 @@ function addField(type) {
             selectField(field);
         }
     };
-    document.getElementById('field-list').appendChild(listItem);
+    const currentPageElement = document.querySelector(`#page-list li[data-id="page-${currentPage}"]`);
+    const fieldList = currentPageElement.querySelector('.field-list');
+    fieldList.appendChild(listItem);
 
     selectField(field);
     toggleFieldMenu();
@@ -117,27 +137,27 @@ function renderForm() {
     const formPreview = document.getElementById('custom-form');
     formPreview.innerHTML = '';
 
-    const fields = Array.from(document.getElementById('field-list').children);
+    const currentPageElement = document.querySelector(`#page-list li[data-id="page-${currentPage}"]`);
+    const fields = Array.from(currentPageElement.querySelector('.field-list').children);
+    
     fields.forEach(listItem => {
-        if (parseInt(listItem.getAttribute('data-page')) === currentPage) {
-            const field = {
-                id: listItem.getAttribute('data-id'),
-                type: listItem.getAttribute('data-type'),
-                label: listItem.querySelector('span').textContent.split(' (')[0]
-            };
+        const field = {
+            id: listItem.getAttribute('data-id'),
+            type: listItem.getAttribute('data-type'),
+            label: listItem.querySelector('span').textContent.split(' (')[0]
+        };
 
-            const fieldElement = document.createElement('div');
-            fieldElement.className = 'form-field';
-            fieldElement.id = `field-block-${field.id}`;
-            fieldElement.innerHTML = `
-                <label for="${field.id}">${field.label}:</label>
-                ${getInputHtml(field.type, field.id)}
-            `;
-            formPreview.appendChild(fieldElement);
-        }
+        const fieldElement = document.createElement('div');
+        fieldElement.className = 'form-field';
+        fieldElement.id = `field-block-${field.id}`;
+        fieldElement.innerHTML = `
+            <label for="${field.id}">${field.label}:</label>
+            ${getInputHtml(field.type, field.id)}
+        `;
+        formPreview.appendChild(fieldElement);
     });
 
-    const totalPages = document.querySelectorAll('#page-list li').length;
+    const totalPages = document.querySelectorAll('#page-list > li').length;
     if (currentPage < totalPages) {
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
@@ -277,31 +297,38 @@ function generateEmbedCode() {
 document.getElementById('add-page-btn').addEventListener('click', addPage);
 
 function initSortable() {
-    const fieldList = document.getElementById('field-list');
-    let draggedItem = null;
+    const pageList = document.getElementById('page-list');
+    const fieldLists = document.querySelectorAll('.field-list');
+    
+    initSortableList(pageList);
+    fieldLists.forEach(initSortableList);
 
-    fieldList.addEventListener('dragstart', function(e) {
-        draggedItem = e.target;
-        setTimeout(() => {
-            e.target.classList.add('dragging');
-        }, 0);
-    });
+    function initSortableList(list) {
+        let draggedItem = null;
 
-    fieldList.addEventListener('dragend', function(e) {
-        e.target.classList.remove('dragging');
-        renderForm();
-    });
+        list.addEventListener('dragstart', function(e) {
+            draggedItem = e.target;
+            setTimeout(() => {
+                e.target.classList.add('dragging');
+            }, 0);
+        });
 
-    fieldList.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(fieldList, e.clientY);
-        const draggable = document.querySelector('.dragging');
-        if (afterElement == null) {
-            fieldList.appendChild(draggable);
-        } else {
-            fieldList.insertBefore(draggable, afterElement);
-        }
-    });
+        list.addEventListener('dragend', function(e) {
+            e.target.classList.remove('dragging');
+            renderForm();
+        });
+
+        list.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(list, e.clientY);
+            const draggable = document.querySelector('.dragging');
+            if (afterElement == null) {
+                list.appendChild(draggable);
+            } else {
+                list.insertBefore(draggable, afterElement);
+            }
+        });
+    }
 
     function getDragAfterElement(container, y) {
         const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
@@ -317,7 +344,7 @@ function initSortable() {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    const listItems = fieldList.querySelectorAll('li');
+    const listItems = document.querySelectorAll('#page-list > li, .field-list > li');
     listItems.forEach(item => {
         item.setAttribute('draggable', 'true');
     });
