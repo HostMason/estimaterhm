@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom Form Builder</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <nav id="navbar">
@@ -19,19 +20,58 @@
                     <button id="add-field-btn">Add Field</button>
                     <button id="add-page-btn" style="display: none;">Add Page</button>
                     <div id="field-options" class="hidden">
-                        <button onclick="addField('text')">Single Line Text</button>
-                        <button onclick="addField('textarea')">Paragraph Text</button>
-                        <button onclick="addField('email')">Email</button>
-                        <button onclick="addField('number')">Number</button>
-                        <button onclick="addField('select')">Dropdown</button>
-                        <button onclick="addField('checkbox')">Checkboxes</button>
-                        <button onclick="addField('radio')">Multiple Choice</button>
-                        <button onclick="addField('name')">Name</button>
-                        <button onclick="addField('phone')">Phone</button>
-                        <button onclick="addField('date')">Date</button>
-                        <button onclick="addField('file')">File Upload</button>
-                        <button onclick="addField('website')">Website</button>
-                        <button onclick="addField('address')">Address</button>
+                        <div class="field-option" onclick="addField('text')">
+                            <i class="fas fa-font"></i>
+                            <span>Single Line Text</span>
+                        </div>
+                        <div class="field-option" onclick="addField('textarea')">
+                            <i class="fas fa-align-left"></i>
+                            <span>Paragraph Text</span>
+                        </div>
+                        <div class="field-option" onclick="addField('email')">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email</span>
+                        </div>
+                        <div class="field-option" onclick="addField('number')">
+                            <i class="fas fa-hashtag"></i>
+                            <span>Number</span>
+                        </div>
+                        <div class="field-option" onclick="addField('select')">
+                            <i class="fas fa-caret-square-down"></i>
+                            <span>Dropdown</span>
+                        </div>
+                        <div class="field-option" onclick="addField('checkbox')">
+                            <i class="fas fa-check-square"></i>
+                            <span>Checkboxes</span>
+                        </div>
+                        <div class="field-option" onclick="addField('radio')">
+                            <i class="fas fa-dot-circle"></i>
+                            <span>Multiple Choice</span>
+                        </div>
+                        <div class="field-option" onclick="addField('name')">
+                            <i class="fas fa-user"></i>
+                            <span>Name</span>
+                        </div>
+                        <div class="field-option" onclick="addField('phone')">
+                            <i class="fas fa-phone"></i>
+                            <span>Phone</span>
+                        </div>
+                        <div class="field-option" onclick="addField('date')">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Date</span>
+                        </div>
+                        <div class="field-option" onclick="addField('file')">
+                            <i class="fas fa-file-upload"></i>
+                            <span>File Upload</span>
+                        </div>
+                        <div class="field-option" onclick="addField('website')">
+                            <i class="fas fa-globe"></i>
+                            <span>Website</span>
+                        </div>
+                        <div class="field-option" onclick="addField('address')">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Address</span>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -108,27 +108,42 @@ body {
     position: absolute;
     top: 100%;
     left: 0;
-    width: 100%;
+    width: 300px;
     background-color: var(--background-color);
     border: 1px solid var(--accent-color);
     border-top: none;
     z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px;
 }
 
-#field-options button {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 5px 10px;
-    border: none;
-    background-color: transparent;
-    color: var(--text-color);
+.field-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-#field-options button:hover {
+.field-option:hover {
     background-color: var(--accent-color);
     color: white;
+}
+
+.field-option i {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.field-option span {
+    font-size: 12px;
 }
 
 .hidden {

@@ -91,7 +91,14 @@ function configField(fieldId) {
 
 // Toggle the field menu visibility
 function toggleFieldMenu() {
-    document.getElementById('field-options').classList.toggle('hidden');
+    const fieldOptions = document.getElementById('field-options');
+    if (fieldOptions.classList.contains('hidden')) {
+        fieldOptions.classList.remove('hidden');
+        fieldOptions.style.display = 'grid';
+    } else {
+        fieldOptions.classList.add('hidden');
+        fieldOptions.style.display = 'none';
+    }
 }
 
 // Select a field
