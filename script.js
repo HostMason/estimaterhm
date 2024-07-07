@@ -11,6 +11,8 @@ let formState = {
     }
 };
 
+let currentPage = 1;
+
 // Main initialization function
 function initFormBuilder() {
     setupEventListeners();
@@ -51,10 +53,10 @@ function toggleBuilderView() {
 document.addEventListener('DOMContentLoaded', initFormBuilder);
 
 function updateFormBasedOnSettings() {
-    console.log('Form settings updated:', formSettings);
+    console.log('Form settings updated:', formState.settings);
     
     const addPageBtn = document.getElementById('add-page-btn');
-    if (formSettings.enablePages) {
+    if (formState.settings.enablePages) {
         addPageBtn.style.display = 'inline-block';
         if (document.querySelectorAll('#field-list li[data-type="page"]').length === 0) {
             addPage();
@@ -64,7 +66,7 @@ function updateFormBasedOnSettings() {
     }
     
     // Apply form style
-    document.getElementById('custom-form').className = formSettings.style + '-style';
+    document.getElementById('custom-form').className = formState.settings.style + '-style';
     
     // Update progress bar
     updateProgressBar();
@@ -76,11 +78,11 @@ function updateProgressBar() {
     const formPreview = document.getElementById('custom-form');
     let progressBar = formPreview.querySelector('.progress-bar');
     
-    if (formSettings.progressBarType !== 'none' && !progressBar) {
+    if (formState.settings.progressBarType !== 'none' && !progressBar) {
         progressBar = document.createElement('div');
         progressBar.className = 'progress-bar';
         formPreview.insertBefore(progressBar, formPreview.firstChild);
-    } else if (formSettings.progressBarType === 'none' && progressBar) {
+    } else if (formState.settings.progressBarType === 'none' && progressBar) {
         progressBar.remove();
     }
     
@@ -95,11 +97,11 @@ function updateProgressBarDisplay() {
 
     const totalPages = document.querySelectorAll('#field-list li[data-type="page"]').length;
     
-    if (formSettings.progressBarType === 'percentage') {
+    if (formState.settings.progressBarType === 'percentage') {
         const percentage = (currentPage / totalPages) * 100;
         progressBar.style.width = `${percentage}%`;
         progressBar.textContent = `${Math.round(percentage)}%`;
-    } else if (formSettings.progressBarType === 'steps') {
+    } else if (formState.settings.progressBarType === 'steps') {
         progressBar.textContent = `Step ${currentPage} of ${totalPages}`;
     }
 }
@@ -200,29 +202,39 @@ function renderForm() {
 
     const pages = document.querySelectorAll('#field-list li[data-type="page"]');
     
-    pages.forEach((page, pageIndex) => {
-        const pageId = page.getAttribute('data-id');
-        const pageTitle = page.querySelector('.page-title').textContent;
-        const pageFields = Array.from(page.querySelectorAll('.page-fields li'));
-        
-        const pageElement = document.createElement('div');
-        pageElement.className = 'form-page';
-        pageElement.id = `form-${pageId}`;
-        pageElement.style.display = pageIndex + 1 === currentPage ? 'block' : 'none';
-        
-        const pageTitleElement = document.createElement('h2');
-        pageTitleElement.textContent = pageTitle;
-        pageElement.appendChild(pageTitleElement);
-        
-        pageFields.forEach(field => {
+    if (pages.length === 0) {
+        // If there are no pages, render all fields directly
+        const fields = document.querySelectorAll('#field-list > li');
+        fields.forEach(field => {
             const fieldElement = createFieldElement(field);
-            pageElement.appendChild(fieldElement);
+            formPreview.appendChild(fieldElement);
         });
-        
-        formPreview.appendChild(pageElement);
-    });
+    } else {
+        pages.forEach((page, pageIndex) => {
+            const pageId = page.getAttribute('data-id');
+            const pageTitle = page.querySelector('.page-title').textContent;
+            const pageFields = Array.from(page.querySelectorAll('.page-fields li'));
+            
+            const pageElement = document.createElement('div');
+            pageElement.className = 'form-page';
+            pageElement.id = `form-${pageId}`;
+            pageElement.style.display = pageIndex + 1 === currentPage ? 'block' : 'none';
+            
+            const pageTitleElement = document.createElement('h2');
+            pageTitleElement.textContent = pageTitle;
+            pageElement.appendChild(pageTitleElement);
+            
+            pageFields.forEach(field => {
+                const fieldElement = createFieldElement(field);
+                pageElement.appendChild(fieldElement);
+            });
+            
+            formPreview.appendChild(pageElement);
+        });
 
-    addNavigationButtons(formPreview);
+        addNavigationButtons(formPreview);
+    }
+
     updatePageDisplay();
 }
 
@@ -261,7 +273,7 @@ function addNavigationButtons(formPreview) {
         navigationButtons.appendChild(nextButton);
     }
 
-    if (currentPage === totalPages) {
+    if (currentPage === totalPages || totalPages === 0) {
         const submitButton = document.createElement('button');
         submitButton.textContent = 'Submit';
         submitButton.type = 'submit';
@@ -317,16 +329,19 @@ function createFieldListItem(field) {
 
 // Add the field to the appropriate page or create a new page if needed
 function addFieldToPage(listItem) {
-    const activePage = document.querySelector('#field-list li[data-type="page"] .page-fields');
-    if (activePage) {
-        activePage.appendChild(listItem);
-    } else if (formState.settings.enablePages) {
-        addPage();
-        const newPage = document.querySelector('#field-list li[data-type="page"] .page-fields');
-        newPage.appendChild(listItem);
+    if (formState.settings.enablePages) {
+        const activePage = document.querySelector(`#field-list li[data-type="page"]:nth-child(${currentPage}) .page-fields`);
+        if (activePage) {
+            activePage.appendChild(listItem);
+        } else {
+            addPage();
+            const newPage = document.querySelector('#field-list li[data-type="page"]:last-child .page-fields');
+            newPage.appendChild(listItem);
+        }
     } else {
         document.getElementById('field-list').appendChild(listItem);
     }
+    renderForm();
 }
 
 // Configure a field
