@@ -2,6 +2,50 @@ let fieldCount = 0;
 let pageCount = 0;
 let selectedField = null;
 let currentPage = 1;
+let usePages = true;
+let progressBarType = 'default';
+
+// Settings object
+const settings = {
+    usePages: true,
+    progressBarType: 'default'
+};
+
+// Function to open settings menu
+function openSettings() {
+    const settingsMenu = document.createElement('div');
+    settingsMenu.id = 'settings-menu';
+    settingsMenu.innerHTML = `
+        <h2>Settings</h2>
+        <label>
+            <input type="checkbox" id="use-pages" ${settings.usePages ? 'checked' : ''}>
+            Use Pages
+        </label>
+        <label>
+            Progress Bar Type:
+            <select id="progress-bar-type">
+                <option value="default" ${settings.progressBarType === 'default' ? 'selected' : ''}>Default</option>
+                <option value="percentage" ${settings.progressBarType === 'percentage' ? 'selected' : ''}>Percentage</option>
+                <option value="fraction" ${settings.progressBarType === 'fraction' ? 'selected' : ''}>Fraction</option>
+            </select>
+        </label>
+        <button id="save-settings">Save</button>
+    `;
+    document.body.appendChild(settingsMenu);
+
+    document.getElementById('save-settings').addEventListener('click', saveSettings);
+}
+
+// Function to save settings
+function saveSettings() {
+    settings.usePages = document.getElementById('use-pages').checked;
+    settings.progressBarType = document.getElementById('progress-bar-type').value;
+    usePages = settings.usePages;
+    progressBarType = settings.progressBarType;
+    document.getElementById('settings-menu').remove();
+    renderForm();
+    updateProgressBar();
+}
 
 function addPage() {
     pageCount++;
@@ -53,7 +97,7 @@ function addField(type) {
         id: `field-${fieldCount}`,
         type: type,
         label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${fieldCount}`,
-        page: currentPage
+        page: usePages ? currentPage : 1
     };
 
     const listItem = document.createElement('li');
@@ -69,9 +113,15 @@ function addField(type) {
             selectField(field);
         }
     };
-    const currentPageElement = document.querySelector(`#page-list li[data-id="page-${currentPage}"]`);
-    const fieldList = currentPageElement.querySelector('.field-list');
-    fieldList.appendChild(listItem);
+
+    if (usePages) {
+        const currentPageElement = document.querySelector(`#page-list li[data-id="page-${currentPage}"]`);
+        const fieldList = currentPageElement.querySelector('.field-list');
+        fieldList.appendChild(listItem);
+    } else {
+        const fieldList = document.querySelector('#field-list');
+        fieldList.appendChild(listItem);
+    }
 
     selectField(field);
     toggleFieldMenu();
@@ -109,9 +159,22 @@ function removePage(pageId) {
 
 function updateProgressBar() {
     const progressBar = document.getElementById('progress-bar');
-    const totalPages = document.querySelectorAll('#page-list li').length;
+    const progressBarContainer = document.getElementById('progress-bar-container');
+    const totalPages = usePages ? document.querySelectorAll('#page-list li').length : 1;
     const progress = (currentPage / totalPages) * 100;
+
     progressBar.style.width = `${progress}%`;
+
+    switch (progressBarType) {
+        case 'percentage':
+            progressBarContainer.textContent = `${Math.round(progress)}%`;
+            break;
+        case 'fraction':
+            progressBarContainer.textContent = `${currentPage} / ${totalPages}`;
+            break;
+        default:
+            progressBarContainer.textContent = '';
+    }
 }
 
 function toggleFieldMenu() {

@@ -7,8 +7,11 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="form-builder">
+    <nav id="navbar">
         <h1>Custom Form Builder</h1>
+        <button id="settings-btn">Settings</button>
+    </nav>
+    <div id="form-builder">
         <div id="theme-controls">
             <input type="file" id="theme-upload" accept=".zip" onchange="loadThemeFromZip(this.files[0])">
             <label for="theme-upload">Upload Theme (ZIP)</label>
