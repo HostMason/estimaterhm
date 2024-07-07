@@ -2,8 +2,8 @@ let fieldCount = 0;
 let selectedField = null;
 
 let formSettings = {
-    enablePages: false,
-    progressBarType: 'none'
+    style: 'basic',
+    enablePages: false
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -12,40 +12,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const builderContainer = document.getElementById('builder-container');
     const generateEmbedCodeBtn = document.getElementById('generate-embed-code');
     const embedCode = document.getElementById('embed-code');
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const saveSettingsBtn = document.getElementById('save-settings');
-    const closeSettingsBtn = document.getElementById('close-settings');
 
     startBuildingBtn.addEventListener('click', function() {
+        formSettings.style = document.getElementById('form-style').value;
+        formSettings.enablePages = document.getElementById('enable-pages').value === 'true';
+        
         layoutQuestions.style.display = 'none';
         builderContainer.style.display = 'flex';
         generateEmbedCodeBtn.style.display = 'block';
+        
+        updateFormBasedOnSettings();
     });
 
     document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
     generateEmbedCodeBtn.addEventListener('click', generateEmbedCode);
-
-    settingsBtn.addEventListener('click', function() {
-        settingsModal.style.display = 'block';
-    });
-
-    saveSettingsBtn.addEventListener('click', function() {
-        formSettings.enablePages = document.getElementById('enable-pages').checked;
-        formSettings.progressBarType = document.getElementById('progress-bar-type').value;
-        settingsModal.style.display = 'none';
-        updateFormBasedOnSettings();
-    });
-
-    closeSettingsBtn.addEventListener('click', function() {
-        settingsModal.style.display = 'none';
-    });
-
-    window.addEventListener('click', function(event) {
-        if (event.target == settingsModal) {
-            settingsModal.style.display = 'none';
-        }
-    });
 
     initSortable();
 });
@@ -208,12 +188,10 @@ function getInputHtml(type, id) {
 }
 
 function generateEmbedCode() {
-    const formType = document.getElementById('form-type').value;
-    const formStyle = document.getElementById('form-style').value;
     const formHtml = document.getElementById('custom-form').innerHTML;
     const embedCode = `
-<div id="embedded-form-container" class="${formStyle}-style ${formType}-form">
-    <form id="embedded-form" data-enable-pages="${formSettings.enablePages}" data-progress-bar-type="${formSettings.progressBarType}">
+<div id="embedded-form-container" class="${formSettings.style}-style">
+    <form id="embedded-form" data-enable-pages="${formSettings.enablePages}">
         ${formHtml}
     </form>
 </div>
@@ -221,14 +199,9 @@ function generateEmbedCode() {
 (function() {
     const form = document.getElementById('embedded-form');
     const enablePages = form.dataset.enablePages === 'true';
-    const progressBarType = form.dataset.progressBarType;
 
     if (enablePages) {
         // Implement pagination logic here
-    }
-
-    if (progressBarType !== 'none') {
-        // Implement progress bar logic here
     }
 
     form.onsubmit = function(e) {
