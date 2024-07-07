@@ -204,6 +204,12 @@ function getInputHtml(type, id) {
                 <input type="text" id="${id}_state" name="${id}_state" placeholder="State">
                 <input type="text" id="${id}_zip" name="${id}_zip" placeholder="ZIP Code">
             `;
+        case 'time':
+            return `<input type="time" id="${id}" name="${id}">`;
+        case 'password':
+            return `<input type="password" id="${id}" name="${id}">`;
+        case 'range':
+            return `<input type="range" id="${id}" name="${id}" min="0" max="100">`;
         default:
             return `<input type="text" id="${id}" name="${id}">`;
     }
