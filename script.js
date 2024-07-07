@@ -92,22 +92,41 @@ function configField(fieldId) {
 // Toggle the field menu visibility
 function toggleFieldMenu() {
     const fieldOptions = document.getElementById('field-options');
-    const hierarchyTree = document.getElementById('hierarchy-tree');
     
     if (fieldOptions.classList.contains('hidden')) {
         fieldOptions.classList.remove('hidden');
         fieldOptions.style.display = 'grid';
-        
-        // Adjust field options size based on hierarchy tree
-        const hierarchyTreeRect = hierarchyTree.getBoundingClientRect();
-        fieldOptions.style.width = `${hierarchyTreeRect.width}px`;
     } else {
         fieldOptions.classList.add('hidden');
         fieldOptions.style.display = 'none';
     }
 }
 
-// Remove the window resize event listener as it's no longer needed
+// Add window resize event listener to adjust layout
+window.addEventListener('resize', function() {
+    adjustLayout();
+});
+
+function adjustLayout() {
+    const builderContainer = document.getElementById('builder-container');
+    const hierarchyTree = document.getElementById('hierarchy-tree');
+    const formPreview = document.getElementById('form-preview');
+
+    if (window.innerWidth <= 768) {
+        builderContainer.style.flexDirection = 'column';
+        hierarchyTree.style.height = '300px';
+        formPreview.style.height = '300px';
+    } else {
+        builderContainer.style.flexDirection = 'row';
+        hierarchyTree.style.height = 'calc(100vh - 200px)';
+        formPreview.style.height = 'calc(100vh - 200px)';
+    }
+}
+
+// Call adjustLayout on initial load
+document.addEventListener('DOMContentLoaded', function() {
+    adjustLayout();
+});
 
 // Select a field
 function selectField(field) {
