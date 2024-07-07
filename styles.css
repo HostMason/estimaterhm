@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+
+#form-builder {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+#toolbox {
+    margin-bottom: 20px;
+}
+
+button {
+    margin: 5px;
+    padding: 5px 10px;
+}
+
+#form-preview {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.form-field {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 5px;
+}
+
+#embed-code {
+    width: 100%;
+    height: 100px;
+}
