@@ -1,12 +1,40 @@
 let fieldCount = 0;
+let pageCount = 0;
 let selectedField = null;
+let currentPage = 1;
+
+function addPage() {
+    pageCount++;
+    const page = {
+        id: `page-${pageCount}`,
+        label: `Page ${pageCount}`
+    };
+
+    const listItem = document.createElement('li');
+    listItem.innerHTML = `
+        <span>${page.label}</span>
+        <button class="remove-btn" onclick="removePage('${page.id}')">&times;</button>
+    `;
+    listItem.setAttribute('data-id', page.id);
+    listItem.onclick = (e) => {
+        if (e.target.tagName !== 'BUTTON') {
+            selectPage(page);
+        }
+    };
+    document.getElementById('page-list').appendChild(listItem);
+
+    selectPage(page);
+    initSortable();
+    updateProgressBar();
+}
 
 function addField(type) {
     fieldCount++;
     const field = {
         id: `field-${fieldCount}`,
         type: type,
-        label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${fieldCount}`
+        label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${fieldCount}`,
+        page: currentPage
     };
 
     const listItem = document.createElement('li');
@@ -16,6 +44,7 @@ function addField(type) {
     `;
     listItem.setAttribute('data-id', field.id);
     listItem.setAttribute('data-type', field.type);
+    listItem.setAttribute('data-page', field.page);
     listItem.onclick = (e) => {
         if (e.target.tagName !== 'BUTTON') {
             selectField(field);
@@ -26,6 +55,41 @@ function addField(type) {
     selectField(field);
     toggleFieldMenu();
     initSortable();
+}
+
+function selectPage(page) {
+    currentPage = parseInt(page.id.split('-')[1]);
+    renderForm();
+    highlightSelectedPage(page.id);
+}
+
+function highlightSelectedPage(pageId) {
+    const listItems = document.querySelectorAll('#page-list li');
+    listItems.forEach(item => {
+        item.classList.remove('selected');
+        if (item.getAttribute('data-id') === pageId) {
+            item.classList.add('selected');
+        }
+    });
+}
+
+function removePage(pageId) {
+    const listItem = document.querySelector(`#page-list li[data-id="${pageId}"]`);
+    if (listItem) {
+        listItem.remove();
+        // Remove all fields associated with this page
+        const fieldsToRemove = document.querySelectorAll(`#field-list li[data-page="${pageId.split('-')[1]}"]`);
+        fieldsToRemove.forEach(field => field.remove());
+        renderForm();
+        updateProgressBar();
+    }
+}
+
+function updateProgressBar() {
+    const progressBar = document.getElementById('progress-bar');
+    const totalPages = document.querySelectorAll('#page-list li').length;
+    const progress = (currentPage / totalPages) * 100;
+    progressBar.style.width = `${progress}%`;
 }
 
 function toggleFieldMenu() {
