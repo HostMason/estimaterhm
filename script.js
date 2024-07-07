@@ -23,6 +23,7 @@ function addPage() {
     listItem.querySelector('.page-header').onclick = (e) => {
         if (e.target.tagName !== 'BUTTON') {
             togglePage(page.id);
+            selectPage(page);
         }
     };
     document.getElementById('page-list').appendChild(listItem);
@@ -81,6 +82,7 @@ function selectPage(page) {
     currentPage = parseInt(page.id.split('-')[1]);
     renderForm();
     highlightSelectedPage(page.id);
+    updateProgressBar();
 }
 
 function highlightSelectedPage(pageId) {
