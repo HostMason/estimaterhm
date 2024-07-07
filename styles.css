@@ -41,13 +41,6 @@ body {
     margin: 0 auto;
 }
 
-#layout-questions {
-    margin-bottom: 20px;
-}
-
-.question {
-    margin-bottom: 15px;
-}
 
 #builder-container {
     display: flex;

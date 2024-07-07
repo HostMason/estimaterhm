@@ -1,17 +1,8 @@
 // Global variables
 let formState = {
     fieldCount: 0,
-    pageCount: 0,
-    selectedField: null,
-    currentPage: 1,
-    settings: {
-        style: 'basic',
-        enablePages: false,
-        progressBarType: 'none'
-    }
+    selectedField: null
 };
-
-let currentPage = 1;
 
 // Main initialization function
 function initFormBuilder() {
@@ -21,221 +12,22 @@ function initFormBuilder() {
 
 // Set up all event listeners
 function setupEventListeners() {
-    document.getElementById('field-list').addEventListener('click', handlePageClick);
-    document.getElementById('start-building').addEventListener('click', startBuilding);
     document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
-    document.getElementById('add-page-btn').addEventListener('click', addPage);
     document.getElementById('generate-embed-code').addEventListener('click', generateEmbedCode);
-}
-
-// Start building the form
-function startBuilding() {
-    updateFormSettings();
-    toggleBuilderView();
-    updateFormBasedOnSettings();
-}
-
-// Update form settings based on user input
-function updateFormSettings() {
-    formState.settings.style = document.getElementById('form-style').value;
-    formState.settings.enablePages = document.getElementById('enable-pages').value === 'true';
-    formState.settings.progressBarType = document.getElementById('progress-bar-type').value;
-}
-
-// Toggle visibility of builder components
-function toggleBuilderView() {
-    document.getElementById('layout-questions').style.display = 'none';
-    document.getElementById('builder-container').style.display = 'flex';
-    document.getElementById('generate-embed-code').style.display = 'block';
 }
 
 // Initialize the form builder when the DOM is loaded
 document.addEventListener('DOMContentLoaded', initFormBuilder);
 
-function updateFormBasedOnSettings() {
-    console.log('Form settings updated:', formState.settings);
-    
-    const addPageBtn = document.getElementById('add-page-btn');
-    if (formState.settings.enablePages) {
-        addPageBtn.style.display = 'inline-block';
-        if (document.querySelectorAll('#field-list li[data-type="page"]').length === 0) {
-            addPage();
-        }
-    } else {
-        addPageBtn.style.display = 'none';
-    }
-    
-    // Apply form style
-    document.getElementById('custom-form').className = formState.settings.style + '-style';
-    
-    // Update progress bar
-    updateProgressBar();
-    
-    renderForm();
-}
-
-function updateProgressBar() {
-    const formPreview = document.getElementById('custom-form');
-    let progressBar = formPreview.querySelector('.progress-bar');
-    
-    if (formState.settings.progressBarType !== 'none' && !progressBar) {
-        progressBar = document.createElement('div');
-        progressBar.className = 'progress-bar';
-        formPreview.insertBefore(progressBar, formPreview.firstChild);
-    } else if (formState.settings.progressBarType === 'none' && progressBar) {
-        progressBar.remove();
-    }
-    
-    if (progressBar) {
-        updateProgressBarDisplay();
-    }
-}
-
-function updateProgressBarDisplay() {
-    const progressBar = document.querySelector('.progress-bar');
-    if (!progressBar) return;
-
-    const totalPages = document.querySelectorAll('#field-list li[data-type="page"]').length;
-    
-    if (formState.settings.progressBarType === 'percentage') {
-        const percentage = (currentPage / totalPages) * 100;
-        progressBar.style.width = `${percentage}%`;
-        progressBar.textContent = `${Math.round(percentage)}%`;
-    } else if (formState.settings.progressBarType === 'steps') {
-        progressBar.textContent = `Step ${currentPage} of ${totalPages}`;
-    }
-}
-
-// Add a new page to the form
-function addPage() {
-    formState.pageCount++;
-    const pageId = `page-${formState.pageCount}`;
-    const listItem = createPageListItem(pageId);
-    document.getElementById('field-list').appendChild(listItem);
-    renderForm();
-    formState.currentPage = formState.pageCount;
-    updatePageDisplay();
-}
-
-// Create a list item for the page
-function createPageListItem(pageId) {
-    const listItem = document.createElement('li');
-    listItem.innerHTML = `
-        <div class="page-header">
-            <span class="page-title" contenteditable="true">Page ${formState.pageCount}</span>
-            <button class="minimize-btn" onclick="togglePageMinimize('${pageId}')">-</button>
-            <button class="config-btn" onclick="configPage('${pageId}')">⚙</button>
-            <button class="remove-btn" onclick="removePage('${pageId}')">&times;</button>
-        </div>
-        <ul class="page-fields" id="${pageId}-fields"></ul>
-    `;
-    listItem.setAttribute('data-id', pageId);
-    listItem.setAttribute('data-type', 'page');
-    return listItem;
-}
-
-// Handle page click events
-function handlePageClick(event) {
-    const pageHeader = event.target.closest('.page-header');
-    if (pageHeader) {
-        const pageId = pageHeader.closest('li').getAttribute('data-id');
-        const pageNumber = Array.from(document.querySelectorAll('#field-list > li[data-type="page"]'))
-            .findIndex(page => page.getAttribute('data-id') === pageId) + 1;
-        formState.currentPage = pageNumber;
-        updatePageDisplay();
-    }
-}
-
-// Update the display of pages
-function updatePageDisplay() {
-    document.querySelectorAll('#field-list > li[data-type="page"]').forEach((page, index) => {
-        const pageId = page.getAttribute('data-id');
-        const formPage = document.getElementById(`form-${pageId}`);
-        if (formPage) {
-            formPage.style.display = index + 1 === formState.currentPage ? 'block' : 'none';
-        }
-    });
-    updateProgressBarDisplay();
-}
-
-// Remove a page from the form
-function removePage(pageId) {
-    const listItem = document.querySelector(`#field-list li[data-id="${pageId}"]`);
-    if (listItem) {
-        listItem.remove();
-        updatePageNumbers();
-        renderForm();
-    }
-}
-
-// Update page numbers after removing a page
-function updatePageNumbers() {
-    document.querySelectorAll('#field-list li[data-type="page"]').forEach((page, index) => {
-        const pageTitle = page.querySelector('.page-title');
-        if (pageTitle.textContent.startsWith('Page ')) {
-            pageTitle.textContent = `Page ${index + 1}`;
-        }
-    });
-}
-
-// Toggle page minimization
-function togglePageMinimize(pageId) {
-    const pageFields = document.getElementById(`${pageId}-fields`);
-    const minimizeBtn = document.querySelector(`#field-list li[data-id="${pageId}"] .minimize-btn`);
-    const isMinimized = pageFields.style.display === 'none';
-    pageFields.style.display = isMinimized ? 'block' : 'none';
-    minimize
-Btn.textContent = isMinimized ? '-' : '+';
-}
-
-// Configure a page
-function configPage(pageId) {
-    console.log(`Configuring page: ${pageId}`);
-    // Implement page configuration logic here
-}
-
 function renderForm() {
     const formPreview = document.getElementById('custom-form');
     formPreview.innerHTML = '';
 
-    updateProgressBar();
-
-    const pages = document.querySelectorAll('#field-list li[data-type="page"]');
-    
-    if (pages.length === 0) {
-        // If there are no pages, render all fields directly
-        const fields = document.querySelectorAll('#field-list > li');
-        fields.forEach(field => {
-            const fieldElement = createFieldElement(field);
-            formPreview.appendChild(fieldElement);
-        });
-    } else {
-        pages.forEach((page, pageIndex) => {
-            const pageId = page.getAttribute('data-id');
-            const pageTitle = page.querySelector('.page-title').textContent;
-            const pageFields = Array.from(page.querySelectorAll('.page-fields li'));
-            
-            const pageElement = document.createElement('div');
-            pageElement.className = 'form-page';
-            pageElement.id = `form-${pageId}`;
-            pageElement.style.display = pageIndex + 1 === currentPage ? 'block' : 'none';
-            
-            const pageTitleElement = document.createElement('h2');
-            pageTitleElement.textContent = pageTitle;
-            pageElement.appendChild(pageTitleElement);
-            
-            pageFields.forEach(field => {
-                const fieldElement = createFieldElement(field);
-                pageElement.appendChild(fieldElement);
-            });
-            
-            formPreview.appendChild(pageElement);
-        });
-
-        addNavigationButtons(formPreview);
-    }
-
-    updatePageDisplay();
+    const fields = document.querySelectorAll('#field-list > li');
+    fields.forEach(field => {
+        const fieldElement = createFieldElement(field);
+        formPreview.appendChild(fieldElement);
+    });
 }
 
 function createFieldElement(field) {
@@ -253,49 +45,15 @@ function createFieldElement(field) {
     return fieldElement;
 }
 
-function addNavigationButtons(formPreview) {
-    const navigationButtons = document.createElement('div');
-    navigationButtons.className = 'form-navigation';
-
-    const totalPages = document.querySelectorAll('#field-list li[data-type="page"]').length;
-
-    if (currentPage > 1) {
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.onclick = () => navigatePage(-1);
-        navigationButtons.appendChild(prevButton);
-    }
-
-    if (currentPage < totalPages) {
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.onclick = () => navigatePage(1);
-        navigationButtons.appendChild(nextButton);
-    }
-
-    if (currentPage === totalPages || totalPages === 0) {
-        const submitButton = document.createElement('button');
-        submitButton.textContent = 'Submit';
-        submitButton.type = 'submit';
-        navigationButtons.appendChild(submitButton);
-    }
-
-    formPreview.appendChild(navigationButtons);
-}
-
-function navigatePage(direction) {
-    currentPage += direction;
-    renderForm();
-}
-
 // Add a new field to the form
 function addField(type) {
     formState.fieldCount++;
     const field = createFieldObject(type);
     const listItem = createFieldListItem(field);
-    addFieldToPage(listItem);
+    document.getElementById('field-list').appendChild(listItem);
     selectField(field);
     toggleFieldMenu();
+    renderForm();
     initSortable();
 }
 
@@ -325,23 +83,6 @@ function createFieldListItem(field) {
         }
     };
     return listItem;
-}
-
-// Add the field to the appropriate page or create a new page if needed
-function addFieldToPage(listItem) {
-    if (formState.settings.enablePages) {
-        const activePage = document.querySelector(`#field-list li[data-type="page"]:nth-child(${currentPage}) .page-fields`);
-        if (activePage) {
-            activePage.appendChild(listItem);
-        } else {
-            addPage();
-            const newPage = document.querySelector('#field-list li[data-type="page"]:last-child .page-fields');
-            newPage.appendChild(listItem);
-        }
-    } else {
-        document.getElementById('field-list').appendChild(listItem);
-    }
-    renderForm();
 }
 
 // Configure a field
@@ -446,25 +187,14 @@ function getInputHtml(type, id) {
 function generateEmbedCode() {
     const formHtml = document.getElementById('custom-form').innerHTML;
     const embedCode = `
-<div id="embedded-form-container" class="${formSettings.style}-style">
-    <form id="embedded-form" data-enable-pages="${formSettings.enablePages}" data-progress-bar-type="${formSettings.progressBarType}">
+<div id="embedded-form-container">
+    <form id="embedded-form">
         ${formHtml}
     </form>
 </div>
 <script>
 (function() {
     const form = document.getElementById('embedded-form');
-    const enablePages = form.dataset.enablePages === 'true';
-    const progressBarType = form.dataset.progressBarType;
-
-    if (enablePages) {
-        // Implement pagination logic here
-    }
-
-    if (progressBarType !== 'none') {
-        // Implement progress bar logic here
-    }
-
     form.onsubmit = function(e) {
         e.preventDefault();
         const formData = new FormData(this);
@@ -508,22 +238,12 @@ function initSortable() {
 
     fieldList.addEventListener('dragover', function(e) {
         e.preventDefault();
+        const afterElement = getDragAfterElement(fieldList, e.clientY);
         const draggable = document.querySelector('.dragging');
-        if (!draggable) return;
-
-        let container;
-        if (formSettings.enablePages) {
-            container = e.target.closest('.page-fields') || e.target.closest('#field-list');
-        } else {
-            container = fieldList;
-        }
-
-        const afterElement = getDragAfterElement(container, e.clientY);
-        
         if (afterElement == null) {
-            container.appendChild(draggable);
+            fieldList.appendChild(draggable);
         } else {
-            container.insertBefore(draggable, afterElement);
+            fieldList.insertBefore(draggable, afterElement);
         }
     });
 
@@ -541,10 +261,8 @@ function initSortable() {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    const listItems = document.querySelectorAll('#field-list > li, .page-fields > li');
+    const listItems = document.querySelectorAll('#field-list > li');
     listItems.forEach(item => {
-        if (item.getAttribute('data-type') !== 'page') {
-            item.setAttribute('draggable', 'true');
-        }
+        item.setAttribute('draggable', 'true');
     });
 }

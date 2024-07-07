@@ -11,34 +11,7 @@
         <h1>Custom Form Builder</h1>
     </nav>
     <div id="form-builder">
-        <div id="layout-questions">
-            <h2>Form Layout</h2>
-            <div class="question">
-                <label for="form-style">Choose a form style:</label>
-                <select id="form-style">
-                    <option value="basic">Basic</option>
-                    <option value="modern">Modern</option>
-                    <option value="minimalist">Minimalist</option>
-                </select>
-            </div>
-            <div class="question">
-                <label for="enable-pages">Does your form need multiple pages?</label>
-                <select id="enable-pages">
-                    <option value="false">No</option>
-                    <option value="true">Yes</option>
-                </select>
-            </div>
-            <div class="question">
-                <label for="progress-bar-type">Progress Bar Type:</label>
-                <select id="progress-bar-type">
-                    <option value="none">None</option>
-                    <option value="percentage">Percentage</option>
-                    <option value="steps">Steps</option>
-                </select>
-            </div>
-            <button id="start-building">Start Building</button>
-        </div>
-        <div id="builder-container" style="display: none;">
+        <div id="builder-container">
             <div id="hierarchy-tree">
                 <h2>Form Structure</h2>
                 <ul id="field-list" class="sortable-list"></ul>
@@ -66,8 +39,8 @@
                 <form id="custom-form"></form>
             </div>
         </div>
-        <button id="generate-embed-code" style="display: none;">Generate Embed Code</button>
-        <textarea id="embed-code" readonly style="display: none;"></textarea>
+        <button id="generate-embed-code">Generate Embed Code</button>
+        <textarea id="embed-code" readonly></textarea>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <script src="theme.js"></script>
