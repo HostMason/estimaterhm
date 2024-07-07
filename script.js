@@ -11,6 +11,7 @@ let formSettings = {
 let currentPage = 1;
 
 document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('field-list').addEventListener('click', handlePageClick);
     const startBuildingBtn = document.getElementById('start-building');
     const layoutQuestions = document.getElementById('layout-questions');
     const builderContainer = document.getElementById('builder-container');
@@ -107,6 +108,30 @@ function addPage() {
     listItem.setAttribute('data-type', 'page');
     document.getElementById('field-list').appendChild(listItem);
     renderForm();
+    currentPage = pageCount;
+    updatePageDisplay();
+}
+
+function handlePageClick(event) {
+    const pageHeader = event.target.closest('.page-header');
+    if (pageHeader) {
+        const pageId = pageHeader.closest('li').getAttribute('data-id');
+        const pageNumber = Array.from(document.querySelectorAll('#field-list > li[data-type="page"]')).findIndex(page => page.getAttribute('data-id') === pageId) + 1;
+        currentPage = pageNumber;
+        updatePageDisplay();
+    }
+}
+
+function updatePageDisplay() {
+    const pages = document.querySelectorAll('#field-list > li[data-type="page"]');
+    pages.forEach((page, index) => {
+        const pageId = page.getAttribute('data-id');
+        const formPage = document.getElementById(`form-${pageId}`);
+        if (formPage) {
+            formPage.style.display = index + 1 === currentPage ? 'block' : 'none';
+        }
+    });
+    updateProgressBarDisplay();
 }
 
 function removePage(pageId) {
@@ -176,6 +201,7 @@ function renderForm() {
     });
 
     addNavigationButtons(formPreview);
+    updatePageDisplay();
 }
 
 function createFieldElement(field) {
@@ -437,7 +463,7 @@ function initSortable() {
 
         let container;
         if (formSettings.enablePages) {
-            container = draggable.closest('.page-fields') || draggable.closest('#field-list');
+            container = e.target.closest('.page-fields') || e.target.closest('#field-list');
         } else {
             container = fieldList;
         }
