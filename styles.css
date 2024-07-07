@@ -51,6 +51,8 @@ body {
     width: 300px;
     border: 1px solid var(--accent-color);
     padding: 20px;
+    height: 500px; /* Set a fixed height */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 #field-list {
