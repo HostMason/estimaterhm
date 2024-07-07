@@ -9,6 +9,10 @@
 <body>
     <div id="form-builder">
         <h1>Custom Form Builder</h1>
+        <div id="theme-controls">
+            <input type="file" id="theme-upload" accept=".zip" onchange="loadThemeFromZip(this.files[0])">
+            <label for="theme-upload">Upload Theme (ZIP)</label>
+        </div>
         <div id="toolbox">
             <button onclick="addField('text')">Add Text Field</button>
             <button onclick="addField('email')">Add Email Field</button>
@@ -24,6 +28,8 @@
         <button onclick="generateEmbedCode()">Generate Embed Code</button>
         <textarea id="embed-code" readonly></textarea>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="theme.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

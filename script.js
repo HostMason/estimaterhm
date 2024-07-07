@@ -4,10 +4,11 @@ function addField(type) {
     fieldCount++;
     const field = document.createElement('div');
     field.className = 'form-field';
+    field.id = `field-block-${fieldCount}`;
     field.innerHTML = `
         <label for="field${fieldCount}">Field ${fieldCount}:</label>
         ${getInputHtml(type, fieldCount)}
-        <button onclick="removeField(this)">Remove</button>
+        <button onclick="removeBlock('field-block-${fieldCount}')">Remove</button>
     `;
     document.getElementById('custom-form').appendChild(field);
 }
@@ -42,10 +43,6 @@ function getInputHtml(type, id) {
     }
 }
 
-function removeField(button) {
-    button.parentElement.remove();
-}
-
 function generateEmbedCode() {
     const formHtml = document.getElementById('custom-form').innerHTML;
     const embedCode = `
@@ -63,3 +60,8 @@ document.getElementById('embedded-form').onsubmit = function(e) {
     `;
     document.getElementById('embed-code').value = embedCode;
 }
+
+// Apply default theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+    applyTheme(currentTheme);
+});
