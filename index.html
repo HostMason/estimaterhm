@@ -13,17 +13,15 @@
             <input type="file" id="theme-upload" accept=".zip" onchange="loadThemeFromZip(this.files[0])">
             <label for="theme-upload">Upload Theme (ZIP)</label>
         </div>
-        <div id="toolbox">
-            <button onclick="addField('text')">Add Text Field</button>
-            <button onclick="addField('email')">Add Email Field</button>
-            <button onclick="addField('number')">Add Number Field</button>
-            <button onclick="addField('textarea')">Add Textarea</button>
-            <button onclick="addField('select')">Add Dropdown</button>
-            <button onclick="addField('checkbox')">Add Checkbox</button>
-            <button onclick="addField('radio')">Add Radio Button</button>
-        </div>
-        <div id="form-preview">
-            <form id="custom-form"></form>
+        <div id="builder-container">
+            <div id="hierarchy-tree">
+                <h2>Form Structure</h2>
+                <ul id="field-list"></ul>
+                <button id="add-field-btn">Add Field</button>
+            </div>
+            <div id="form-preview">
+                <form id="custom-form"></form>
+            </div>
         </div>
         <button onclick="generateEmbedCode()">Generate Embed Code</button>
         <textarea id="embed-code" readonly></textarea>

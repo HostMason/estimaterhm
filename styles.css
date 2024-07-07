@@ -15,7 +15,7 @@ body {
 }
 
 #form-builder {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -35,8 +35,40 @@ body {
     cursor: pointer;
 }
 
-#toolbox {
-    margin-bottom: 20px;
+#builder-container {
+    display: flex;
+    gap: 20px;
+}
+
+#hierarchy-tree {
+    width: 300px;
+    border: 1px solid var(--accent-color);
+    padding: 20px;
+}
+
+#field-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#field-list li {
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+#field-list li:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+#add-field-btn {
+    width: 100%;
+    margin-top: 10px;
+}
+
+#form-preview {
+    flex-grow: 1;
+    border: 1px solid var(--accent-color);
+    padding: 20px;
 }
 
 button {
@@ -47,12 +79,6 @@ button {
     border: none;
     border-radius: 3px;
     cursor: pointer;
-}
-
-#form-preview {
-    border: 1px solid var(--accent-color);
-    padding: 20px;
-    margin-bottom: 20px;
 }
 
 .form-field {
