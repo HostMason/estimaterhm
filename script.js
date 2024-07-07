@@ -92,13 +92,16 @@ function configField(fieldId) {
 // Toggle the field menu visibility
 function toggleFieldMenu() {
     const fieldOptions = document.getElementById('field-options');
+    const addFieldBtn = document.getElementById('add-field-btn');
     
     if (fieldOptions.classList.contains('hidden')) {
         fieldOptions.classList.remove('hidden');
         fieldOptions.style.display = 'grid';
+        addFieldBtn.textContent = 'Close Field Menu';
     } else {
         fieldOptions.classList.add('hidden');
         fieldOptions.style.display = 'none';
+        addFieldBtn.textContent = 'Add Field';
     }
 }
 
