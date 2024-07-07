@@ -10,12 +10,22 @@ function addField(type) {
     };
 
     const listItem = document.createElement('li');
-    listItem.textContent = `${field.label} (${field.type})`;
-    listItem.onclick = () => selectField(field);
+    listItem.innerHTML = `
+        <span>${field.label} (${field.type})</span>
+        <button class="remove-btn" onclick="removeField('${field.id}')">&times;</button>
+    `;
+    listItem.setAttribute('data-id', field.id);
+    listItem.setAttribute('data-type', field.type);
+    listItem.onclick = (e) => {
+        if (e.target.tagName !== 'BUTTON') {
+            selectField(field);
+        }
+    };
     document.getElementById('field-list').appendChild(listItem);
 
     selectField(field);
     toggleFieldMenu();
+    initSortable();
 }
 
 function toggleFieldMenu() {
@@ -33,7 +43,7 @@ function highlightSelectedField(fieldId) {
     const listItems = document.querySelectorAll('#field-list li');
     listItems.forEach(item => {
         item.classList.remove('selected');
-        if (item.textContent.toLowerCase().includes(fieldId)) {
+        if (item.getAttribute('data-id') === fieldId) {
             item.classList.add('selected');
         }
     });
@@ -46,9 +56,9 @@ function renderForm() {
     const fields = Array.from(document.getElementById('field-list').children);
     fields.forEach(listItem => {
         const field = {
-            id: listItem.textContent.split(' (')[0].toLowerCase().replace(' ', '-'),
-            type: listItem.textContent.split('(')[1].slice(0, -1),
-            label: listItem.textContent.split(' (')[0]
+            id: listItem.getAttribute('data-id'),
+            type: listItem.getAttribute('data-type'),
+            label: listItem.querySelector('span').textContent.split(' (')[0]
         };
 
         const fieldElement = document.createElement('div');
@@ -57,15 +67,13 @@ function renderForm() {
         fieldElement.innerHTML = `
             <label for="${field.id}">${field.label}:</label>
             ${getInputHtml(field.type, field.id)}
-            <button onclick="removeField('${field.id}')">Remove</button>
         `;
         formPreview.appendChild(fieldElement);
     });
 }
 
 function removeField(fieldId) {
-    const listItem = Array.from(document.getElementById('field-list').children)
-        .find(item => item.textContent.toLowerCase().includes(fieldId));
+    const listItem = document.querySelector(`#field-list li[data-id="${fieldId}"]`);
     if (listItem) {
         listItem.remove();
         renderForm();
@@ -120,8 +128,56 @@ document.getElementById('embedded-form').onsubmit = function(e) {
     document.getElementById('embed-code').value = embedCode;
 }
 
+function initSortable() {
+    const fieldList = document.getElementById('field-list');
+    let draggedItem = null;
+
+    fieldList.addEventListener('dragstart', function(e) {
+        draggedItem = e.target;
+        setTimeout(() => {
+            e.target.classList.add('dragging');
+        }, 0);
+    });
+
+    fieldList.addEventListener('dragend', function(e) {
+        e.target.classList.remove('dragging');
+        renderForm();
+    });
+
+    fieldList.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(fieldList, e.clientY);
+        const draggable = document.querySelector('.dragging');
+        if (afterElement == null) {
+            fieldList.appendChild(draggable);
+        } else {
+            fieldList.insertBefore(draggable, afterElement);
+        }
+    });
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    const listItems = fieldList.querySelectorAll('li');
+    listItems.forEach(item => {
+        item.setAttribute('draggable', 'true');
+    });
+}
+
 // Apply default theme on page load
 document.addEventListener('DOMContentLoaded', function() {
     applyTheme(currentTheme);
     document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
+    initSortable();
 });
