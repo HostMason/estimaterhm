@@ -115,8 +115,28 @@ function removeField(fieldId) {
     const listItem = document.querySelector(`#field-list li[data-id="${fieldId}"]`);
     if (listItem) {
         listItem.remove();
+        updateFieldNumbers();
         renderForm();
     }
+}
+
+// Update field numbers after removing a field
+function updateFieldNumbers() {
+    const fields = document.querySelectorAll('#field-list > li');
+    let maxNumber = 0;
+
+    fields.forEach(field => {
+        const label = field.querySelector('span').textContent;
+        const match = label.match(/\d+$/);
+        if (match) {
+            const number = parseInt(match[0], 10);
+            if (number > maxNumber) {
+                maxNumber = number;
+            }
+        }
+    });
+
+    formState.fieldCount = maxNumber;
 }
 
 function getInputHtml(type, id) {
