@@ -156,21 +156,40 @@ function removeField(fieldId) {
 
 function getInputHtml(type, id) {
     switch(type) {
+        case 'name':
+            return `
+                <input type="text" id="${id}_first" name="${id}_first" placeholder="First Name">
+                <input type="text" id="${id}_last" name="${id}_last" placeholder="Last Name">
+            `;
+        case 'email':
+            return `<input type="email" id="${id}" name="${id}">`;
+        case 'phone':
+            return `<input type="tel" id="${id}" name="${id}">`;
+        case 'address':
+            return `
+                <input type="text" id="${id}_street" name="${id}_street" placeholder="Street Address">
+                <input type="text" id="${id}_city" name="${id}_city" placeholder="City">
+                <input type="text" id="${id}_state" name="${id}_state" placeholder="State">
+                <input type="text" id="${id}_zip" name="${id}_zip" placeholder="ZIP Code">
+            `;
+        case 'website':
+            return `<input type="url" id="${id}" name="${id}">`;
         case 'text':
             return `<input type="text" id="${id}" name="${id}">`;
         case 'textarea':
             return `<textarea id="${id}" name="${id}"></textarea>`;
-        case 'email':
-            return `<input type="email" id="${id}" name="${id}">`;
         case 'number':
             return `<input type="number" id="${id}" name="${id}">`;
-        case 'select':
+        case 'radio':
             return `
-                <select id="${id}" name="${id}">
-                    <option value="">Select an option</option>
-                    <option value="option1">Option 1</option>
-                    <option value="option2">Option 2</option>
-                </select>
+                <div>
+                    <input type="radio" id="${id}_1" name="${id}" value="option1">
+                    <label for="${id}_1">Option 1</label>
+                </div>
+                <div>
+                    <input type="radio" id="${id}_2" name="${id}" value="option2">
+                    <label for="${id}_2">Option 2</label>
+                </div>
             `;
         case 'checkbox':
             return `
@@ -183,42 +202,31 @@ function getInputHtml(type, id) {
                     <label for="${id}_2">Option 2</label>
                 </div>
             `;
-        case 'radio':
+        case 'calculations':
+            return `<input type="text" id="${id}" name="${id}" readonly>`;
+        case 'select':
             return `
-                <div>
-                    <input type="radio" id="${id}_1" name="${id}" value="option1">
-                    <label for="${id}_1">Option 1</label>
-                </div>
-                <div>
-                    <input type="radio" id="${id}_2" name="${id}" value="option2">
-                    <label for="${id}_2">Option 2</label>
-                </div>
+                <select id="${id}" name="${id}">
+                    <option value="">Select an option</option>
+                    <option value="option1">Option 1</option>
+                    <option value="option2">Option 2</option>
+                </select>
             `;
-        case 'name':
-            return `
-                <input type="text" id="${id}_first" name="${id}_first" placeholder="First Name">
-                <input type="text" id="${id}_last" name="${id}_last" placeholder="Last Name">
-            `;
-        case 'phone':
-            return `<input type="tel" id="${id}" name="${id}">`;
         case 'date':
             return `<input type="date" id="${id}" name="${id}">`;
-        case 'file':
-            return `<input type="file" id="${id}" name="${id}">`;
-        case 'website':
-            return `<input type="url" id="${id}" name="${id}">`;
-        case 'address':
-            return `
-                <input type="text" id="${id}_street" name="${id}_street" placeholder="Street Address">
-                <input type="text" id="${id}_city" name="${id}_city" placeholder="City">
-                <input type="text" id="${id}_state" name="${id}_state" placeholder="State">
-                <input type="text" id="${id}_zip" name="${id}_zip" placeholder="ZIP Code">
-            `;
         case 'time':
             return `<input type="time" id="${id}" name="${id}">`;
-        case 'password':
-            return `<input type="password" id="${id}" name="${id}">`;
-        case 'range':
+        case 'html':
+            return `<div id="${id}">HTML content goes here</div>`;
+        case 'pagebreak':
+            return `<hr id="${id}" class="page-break">`;
+        case 'hidden':
+            return `<input type="hidden" id="${id}" name="${id}">`;
+        case 'section':
+            return `<fieldset id="${id}"><legend>Section Title</legend></fieldset>`;
+        case 'fieldgroup':
+            return `<div id="${id}" class="field-group"></div>`;
+        case 'slider':
             return `<input type="range" id="${id}" name="${id}" min="0" max="100">`;
         default:
             return `<input type="text" id="${id}" name="${id}">`;
