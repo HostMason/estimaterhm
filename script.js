@@ -3,8 +3,11 @@ let selectedField = null;
 
 let formSettings = {
     style: 'basic',
-    enablePages: false
+    enablePages: false,
+    progressBarType: 'none'
 };
+
+let currentPage = 1;
 
 document.addEventListener('DOMContentLoaded', function() {
     const startBuildingBtn = document.getElementById('start-building');
@@ -45,16 +48,42 @@ function updateFormBasedOnSettings() {
     // Apply form style
     document.getElementById('custom-form').className = formSettings.style + '-style';
     
-    // Update progress bar (if implemented)
+    // Update progress bar
     updateProgressBar();
     
     renderForm();
 }
 
 function updateProgressBar() {
-    // Implement progress bar logic based on formSettings.progressBarType
-    // This is a placeholder for future implementation
-    console.log('Progress bar type:', formSettings.progressBarType);
+    const formPreview = document.getElementById('custom-form');
+    let progressBar = formPreview.querySelector('.progress-bar');
+    
+    if (formSettings.progressBarType !== 'none' && !progressBar) {
+        progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        formPreview.insertBefore(progressBar, formPreview.firstChild);
+    } else if (formSettings.progressBarType === 'none' && progressBar) {
+        progressBar.remove();
+    }
+    
+    if (progressBar) {
+        updateProgressBarDisplay();
+    }
+}
+
+function updateProgressBarDisplay() {
+    const progressBar = document.querySelector('.progress-bar');
+    if (!progressBar) return;
+
+    const totalPages = document.querySelectorAll('#field-list li[data-type="page"]').length;
+    
+    if (formSettings.progressBarType === 'percentage') {
+        const percentage = (currentPage / totalPages) * 100;
+        progressBar.style.width = `${percentage}%`;
+        progressBar.textContent = `${Math.round(percentage)}%`;
+    } else if (formSettings.progressBarType === 'steps') {
+        progressBar.textContent = `Step ${currentPage} of ${totalPages}`;
+    }
 }
 
 function addPage() {
@@ -77,6 +106,83 @@ function removePage(pageId) {
         listItem.remove();
         renderForm();
     }
+}
+
+function renderForm() {
+    const formPreview = document.getElementById('custom-form');
+    formPreview.innerHTML = '';
+
+    updateProgressBar();
+
+    const fields = Array.from(document.getElementById('field-list').children);
+    let currentPageFields = [];
+    let pageCount = 0;
+
+    fields.forEach((listItem, index) => {
+        const field = {
+            id: listItem.getAttribute('data-id'),
+            type: listItem.getAttribute('data-type'),
+            label: listItem.querySelector('span').textContent.split(' (')[0]
+        };
+
+        if (field.type === 'page' || index === fields.length - 1) {
+            pageCount++;
+            if (pageCount === currentPage) {
+                renderPage(currentPageFields, formPreview, pageCount === 1, index === fields.length - 1);
+            }
+            currentPageFields = [];
+        } else {
+            currentPageFields.push(field);
+        }
+    });
+
+    if (pageCount === 0) {
+        renderPage(currentPageFields, formPreview, true, true);
+    }
+}
+
+function renderPage(fields, formPreview, isFirstPage, isLastPage) {
+    fields.forEach(field => {
+        const fieldElement = document.createElement('div');
+        fieldElement.className = 'form-field';
+        fieldElement.id = `field-block-${field.id}`;
+        fieldElement.innerHTML = `
+            <label for="${field.id}">${field.label}:</label>
+            ${getInputHtml(field.type, field.id)}
+        `;
+        formPreview.appendChild(fieldElement);
+    });
+
+    const navigationButtons = document.createElement('div');
+    navigationButtons.className = 'form-navigation';
+
+    if (!isFirstPage) {
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.onclick = () => navigatePage(-1);
+        navigationButtons.appendChild(prevButton);
+    }
+
+    if (!isLastPage) {
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.onclick = () => navigatePage(1);
+        navigationButtons.appendChild(nextButton);
+    }
+
+    if (isLastPage) {
+        const submitButton = document.createElement('button');
+        submitButton.textContent = 'Submit';
+        submitButton.type = 'submit';
+        navigationButtons.appendChild(submitButton);
+    }
+
+    formPreview.appendChild(navigationButtons);
+}
+
+function navigatePage(direction) {
+    currentPage += direction;
+    renderForm();
 }
 
 function addField(type) {
