@@ -22,10 +22,44 @@ function renderForm() {
     const formPreview = document.getElementById('custom-form');
     formPreview.innerHTML = '';
 
-    const fields = document.querySelectorAll('#field-list > li');
-    fields.forEach(field => {
-        const fieldElement = createFieldElement(field);
-        formPreview.appendChild(fieldElement);
+    const pages = document.querySelectorAll('#field-list > li[data-type="page"]');
+    pages.forEach((page, index) => {
+        const pageElement = document.createElement('div');
+        pageElement.className = 'form-page';
+        pageElement.innerHTML = `<h2>${page.querySelector('span').textContent}</h2>`;
+
+        const fields = page.querySelectorAll('ul > li');
+        fields.forEach(field => {
+            const fieldElement = createFieldElement(field);
+            pageElement.appendChild(fieldElement);
+        });
+
+        formPreview.appendChild(pageElement);
+
+        if (index < pages.length - 1) {
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next';
+            nextButton.className = 'next-page-btn';
+            nextButton.onclick = () => showPage(index + 1);
+            pageElement.appendChild(nextButton);
+        }
+
+        if (index > 0) {
+            const prevButton = document.createElement('button');
+            prevButton.textContent = 'Previous';
+            prevButton.className = 'prev-page-btn';
+            prevButton.onclick = () => showPage(index - 1);
+            pageElement.appendChild(prevButton);
+        }
+    });
+
+    showPage(0);
+}
+
+function showPage(pageIndex) {
+    const pages = document.querySelectorAll('#custom-form .form-page');
+    pages.forEach((page, index) => {
+        page.style.display = index === pageIndex ? 'block' : 'none';
     });
 }
 
@@ -48,7 +82,24 @@ function createFieldElement(field) {
 function addField(type) {
     const field = createFieldObject(type);
     const listItem = createFieldListItem(field);
-    document.getElementById('field-list').appendChild(listItem);
+    
+    if (type === 'page') {
+        document.getElementById('field-list').appendChild(listItem);
+    } else {
+        const pages = document.querySelectorAll('#field-list > li[data-type="page"]');
+        if (pages.length === 0) {
+            // If no pages exist, create a default page and add the field to it
+            const defaultPage = createFieldObject('page');
+            const defaultPageItem = createFieldListItem(defaultPage);
+            document.getElementById('field-list').appendChild(defaultPageItem);
+            defaultPageItem.querySelector('ul').appendChild(listItem);
+        } else {
+            // Add the field to the last page
+            const lastPage = pages[pages.length - 1];
+            lastPage.querySelector('ul').appendChild(listItem);
+        }
+    }
+    
     selectField(field);
     toggleFieldMenu();
     renderForm();
@@ -67,11 +118,20 @@ function createFieldObject(type) {
 // Create a list item for the field
 function createFieldListItem(field) {
     const listItem = document.createElement('li');
-    listItem.innerHTML = `
-        <span contenteditable="true">${field.label}</span>
-        <button class="config-btn" onclick="configField('${field.id}')">⚙</button>
-        <button class="remove-btn" onclick="removeField('${field.id}')">&times;</button>
-    `;
+    if (field.type === 'page') {
+        listItem.innerHTML = `
+            <span contenteditable="true">${field.label}</span>
+            <button class="config-btn" onclick="configField('${field.id}')">⚙</button>
+            <button class="remove-btn" onclick="removeField('${field.id}')">&times;</button>
+            <ul class="page-fields"></ul>
+        `;
+    } else {
+        listItem.innerHTML = `
+            <span contenteditable="true">${field.label}</span>
+            <button class="config-btn" onclick="configField('${field.id}')">⚙</button>
+            <button class="remove-btn" onclick="removeField('${field.id}')">&times;</button>
+        `;
+    }
     listItem.setAttribute('data-id', field.id);
     listItem.setAttribute('data-type', field.type);
     listItem.setAttribute('draggable', 'true');
@@ -218,8 +278,8 @@ function getInputHtml(type, id) {
             return `<input type="time" id="${id}" name="${id}">`;
         case 'html':
             return `<div id="${id}">HTML content goes here</div>`;
-        case 'pagebreak':
-            return `<hr id="${id}" class="page-break">`;
+        case 'page':
+            return `<div id="${id}" class="form-page"><h2>New Page</h2></div>`;
         case 'hidden':
             return `<input type="hidden" id="${id}" name="${id}">`;
         case 'section':
