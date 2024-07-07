@@ -92,14 +92,34 @@ function configField(fieldId) {
 // Toggle the field menu visibility
 function toggleFieldMenu() {
     const fieldOptions = document.getElementById('field-options');
+    const hierarchyTree = document.getElementById('hierarchy-tree');
+    
     if (fieldOptions.classList.contains('hidden')) {
         fieldOptions.classList.remove('hidden');
         fieldOptions.style.display = 'grid';
+        
+        // Adjust field options size based on hierarchy tree
+        const hierarchyTreeRect = hierarchyTree.getBoundingClientRect();
+        fieldOptions.style.width = `${hierarchyTreeRect.width}px`;
+        
+        // Adjust grid columns based on available width
+        const optionWidth = 70; // Approximate width of each option including gap
+        const columns = Math.floor(hierarchyTreeRect.width / optionWidth);
+        fieldOptions.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
     } else {
         fieldOptions.classList.add('hidden');
         fieldOptions.style.display = 'none';
     }
 }
+
+// Add window resize event listener to adjust field options when window is resized
+window.addEventListener('resize', function() {
+    const fieldOptions = document.getElementById('field-options');
+    if (!fieldOptions.classList.contains('hidden')) {
+        toggleFieldMenu();
+        toggleFieldMenu();
+    }
+});
 
 // Select a field
 function selectField(field) {
