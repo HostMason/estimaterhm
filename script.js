@@ -1,41 +1,54 @@
-let fieldCount = 0;
-let pageCount = 0;
-let selectedField = null;
-
-let formSettings = {
-    style: 'basic',
-    enablePages: false,
-    progressBarType: 'none'
+// Global variables
+let formState = {
+    fieldCount: 0,
+    pageCount: 0,
+    selectedField: null,
+    currentPage: 1,
+    settings: {
+        style: 'basic',
+        enablePages: false,
+        progressBarType: 'none'
+    }
 };
 
-let currentPage = 1;
+// Main initialization function
+function initFormBuilder() {
+    setupEventListeners();
+    initSortable();
+}
 
-document.addEventListener('DOMContentLoaded', function() {
+// Set up all event listeners
+function setupEventListeners() {
     document.getElementById('field-list').addEventListener('click', handlePageClick);
-    const startBuildingBtn = document.getElementById('start-building');
-    const layoutQuestions = document.getElementById('layout-questions');
-    const builderContainer = document.getElementById('builder-container');
-    const generateEmbedCodeBtn = document.getElementById('generate-embed-code');
-    const embedCode = document.getElementById('embed-code');
-
-    startBuildingBtn.addEventListener('click', function() {
-        formSettings.style = document.getElementById('form-style').value;
-        formSettings.enablePages = document.getElementById('enable-pages').value === 'true';
-        formSettings.progressBarType = document.getElementById('progress-bar-type').value;
-        
-        layoutQuestions.style.display = 'none';
-        builderContainer.style.display = 'flex';
-        generateEmbedCodeBtn.style.display = 'block';
-        
-        updateFormBasedOnSettings();
-    });
-
+    document.getElementById('start-building').addEventListener('click', startBuilding);
     document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
     document.getElementById('add-page-btn').addEventListener('click', addPage);
-    generateEmbedCodeBtn.addEventListener('click', generateEmbedCode);
+    document.getElementById('generate-embed-code').addEventListener('click', generateEmbedCode);
+}
 
-    initSortable();
-});
+// Start building the form
+function startBuilding() {
+    updateFormSettings();
+    toggleBuilderView();
+    updateFormBasedOnSettings();
+}
+
+// Update form settings based on user input
+function updateFormSettings() {
+    formState.settings.style = document.getElementById('form-style').value;
+    formState.settings.enablePages = document.getElementById('enable-pages').value === 'true';
+    formState.settings.progressBarType = document.getElementById('progress-bar-type').value;
+}
+
+// Toggle visibility of builder components
+function toggleBuilderView() {
+    document.getElementById('layout-questions').style.display = 'none';
+    document.getElementById('builder-container').style.display = 'flex';
+    document.getElementById('generate-embed-code').style.display = 'block';
+}
+
+// Initialize the form builder when the DOM is loaded
+document.addEventListener('DOMContentLoaded', initFormBuilder);
 
 function updateFormBasedOnSettings() {
     console.log('Form settings updated:', formSettings);
@@ -91,13 +104,23 @@ function updateProgressBarDisplay() {
     }
 }
 
+// Add a new page to the form
 function addPage() {
-    pageCount++;
-    const pageId = `page-${pageCount}`;
+    formState.pageCount++;
+    const pageId = `page-${formState.pageCount}`;
+    const listItem = createPageListItem(pageId);
+    document.getElementById('field-list').appendChild(listItem);
+    renderForm();
+    formState.currentPage = formState.pageCount;
+    updatePageDisplay();
+}
+
+// Create a list item for the page
+function createPageListItem(pageId) {
     const listItem = document.createElement('li');
     listItem.innerHTML = `
         <div class="page-header">
-            <span class="page-title" contenteditable="true">Page ${pageCount}</span>
+            <span class="page-title" contenteditable="true">Page ${formState.pageCount}</span>
             <button class="minimize-btn" onclick="togglePageMinimize('${pageId}')">-</button>
             <button class="config-btn" onclick="configPage('${pageId}')">⚙</button>
             <button class="remove-btn" onclick="removePage('${pageId}')">&times;</button>
@@ -106,34 +129,34 @@ function addPage() {
     `;
     listItem.setAttribute('data-id', pageId);
     listItem.setAttribute('data-type', 'page');
-    document.getElementById('field-list').appendChild(listItem);
-    renderForm();
-    currentPage = pageCount;
-    updatePageDisplay();
+    return listItem;
 }
 
+// Handle page click events
 function handlePageClick(event) {
     const pageHeader = event.target.closest('.page-header');
     if (pageHeader) {
         const pageId = pageHeader.closest('li').getAttribute('data-id');
-        const pageNumber = Array.from(document.querySelectorAll('#field-list > li[data-type="page"]')).findIndex(page => page.getAttribute('data-id') === pageId) + 1;
-        currentPage = pageNumber;
+        const pageNumber = Array.from(document.querySelectorAll('#field-list > li[data-type="page"]'))
+            .findIndex(page => page.getAttribute('data-id') === pageId) + 1;
+        formState.currentPage = pageNumber;
         updatePageDisplay();
     }
 }
 
+// Update the display of pages
 function updatePageDisplay() {
-    const pages = document.querySelectorAll('#field-list > li[data-type="page"]');
-    pages.forEach((page, index) => {
+    document.querySelectorAll('#field-list > li[data-type="page"]').forEach((page, index) => {
         const pageId = page.getAttribute('data-id');
         const formPage = document.getElementById(`form-${pageId}`);
         if (formPage) {
-            formPage.style.display = index + 1 === currentPage ? 'block' : 'none';
+            formPage.style.display = index + 1 === formState.currentPage ? 'block' : 'none';
         }
     });
     updateProgressBarDisplay();
 }
 
+// Remove a page from the form
 function removePage(pageId) {
     const listItem = document.querySelector(`#field-list li[data-id="${pageId}"]`);
     if (listItem) {
@@ -143,9 +166,9 @@ function removePage(pageId) {
     }
 }
 
+// Update page numbers after removing a page
 function updatePageNumbers() {
-    const pages = document.querySelectorAll('#field-list li[data-type="page"]');
-    pages.forEach((page, index) => {
+    document.querySelectorAll('#field-list li[data-type="page"]').forEach((page, index) => {
         const pageTitle = page.querySelector('.page-title');
         if (pageTitle.textContent.startsWith('Page ')) {
             pageTitle.textContent = `Page ${index + 1}`;
@@ -153,21 +176,20 @@ function updatePageNumbers() {
     });
 }
 
+// Toggle page minimization
 function togglePageMinimize(pageId) {
     const pageFields = document.getElementById(`${pageId}-fields`);
     const minimizeBtn = document.querySelector(`#field-list li[data-id="${pageId}"] .minimize-btn`);
-    if (pageFields.style.display === 'none') {
-        pageFields.style.display = 'block';
-        minimizeBtn.textContent = '-';
-    } else {
-        pageFields.style.display = 'none';
-        minimizeBtn.textContent = '+';
-    }
+    const isMinimized = pageFields.style.display === 'none';
+    pageFields.style.display = isMinimized ? 'block' : 'none';
+    minimize
+Btn.textContent = isMinimized ? '-' : '+';
 }
 
+// Configure a page
 function configPage(pageId) {
-    // Implement page configuration logic here
     console.log(`Configuring page: ${pageId}`);
+    // Implement page configuration logic here
 }
 
 function renderForm() {
@@ -254,14 +276,28 @@ function navigatePage(direction) {
     renderForm();
 }
 
+// Add a new field to the form
 function addField(type) {
-    fieldCount++;
-    const field = {
-        id: `field-${fieldCount}`,
-        type: type,
-        label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${fieldCount}`
-    };
+    formState.fieldCount++;
+    const field = createFieldObject(type);
+    const listItem = createFieldListItem(field);
+    addFieldToPage(listItem);
+    selectField(field);
+    toggleFieldMenu();
+    initSortable();
+}
 
+// Create a field object
+function createFieldObject(type) {
+    return {
+        id: `field-${formState.fieldCount}`,
+        type: type,
+        label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${formState.fieldCount}`
+    };
+}
+
+// Create a list item for the field
+function createFieldListItem(field) {
     const listItem = document.createElement('li');
     listItem.innerHTML = `
         <span contenteditable="true">${field.label}</span>
@@ -276,50 +312,49 @@ function addField(type) {
             selectField(field);
         }
     };
+    return listItem;
+}
 
+// Add the field to the appropriate page or create a new page if needed
+function addFieldToPage(listItem) {
     const activePage = document.querySelector('#field-list li[data-type="page"] .page-fields');
     if (activePage) {
         activePage.appendChild(listItem);
-    } else if (formSettings.enablePages) {
-        // If pages are enabled but no page exists, create a new page
+    } else if (formState.settings.enablePages) {
         addPage();
         const newPage = document.querySelector('#field-list li[data-type="page"] .page-fields');
         newPage.appendChild(listItem);
     } else {
         document.getElementById('field-list').appendChild(listItem);
     }
-
-    selectField(field);
-    toggleFieldMenu();
-    initSortable();
 }
 
+// Configure a field
 function configField(fieldId) {
-    // Implement field configuration logic here
     console.log(`Configuring field: ${fieldId}`);
+    // Implement field configuration logic here
 }
 
+// Toggle the field menu visibility
 function toggleFieldMenu() {
-    const fieldOptions = document.getElementById('field-options');
-    fieldOptions.classList.toggle('hidden');
+    document.getElementById('field-options').classList.toggle('hidden');
 }
 
+// Select a field
 function selectField(field) {
-    selectedField = field;
+    formState.selectedField = field;
     renderForm();
     highlightSelectedField(field.id);
 }
 
+// Highlight the selected field in the list
 function highlightSelectedField(fieldId) {
-    const listItems = document.querySelectorAll('#field-list li');
-    listItems.forEach(item => {
-        item.classList.remove('selected');
-        if (item.getAttribute('data-id') === fieldId) {
-            item.classList.add('selected');
-        }
+    document.querySelectorAll('#field-list li').forEach(item => {
+        item.classList.toggle('selected', item.getAttribute('data-id') === fieldId);
     });
 }
 
+// Remove a field from the form
 function removeField(fieldId) {
     const listItem = document.querySelector(`#field-list li[data-id="${fieldId}"]`);
     if (listItem) {
