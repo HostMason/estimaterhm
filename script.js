@@ -391,16 +391,30 @@ function initSortable() {
 
     fieldList.addEventListener('dragover', function(e) {
         e.preventDefault();
-        const afterElement = getDragAfterElement(fieldList, e.clientY);
+        const afterElement = getDragAfterElement(e.clientY);
         const draggable = document.querySelector('.dragging');
-        if (afterElement == null) {
-            fieldList.appendChild(draggable);
+        
+        if (draggable.getAttribute('data-type') === 'page') {
+            if (afterElement == null) {
+                fieldList.appendChild(draggable);
+            } else {
+                fieldList.insertBefore(draggable, afterElement);
+            }
         } else {
-            fieldList.insertBefore(draggable, afterElement);
+            const closestPage = getClosestPage(e.clientY);
+            if (closestPage) {
+                const pageFields = closestPage.querySelector('.page-fields');
+                const afterElementInPage = getDragAfterElement(e.clientY, pageFields);
+                if (afterElementInPage == null) {
+                    pageFields.appendChild(draggable);
+                } else {
+                    pageFields.insertBefore(draggable, afterElementInPage);
+                }
+            }
         }
     });
 
-    function getDragAfterElement(container, y) {
+    function getDragAfterElement(y, container = fieldList) {
         const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
 
         return draggableElements.reduce((closest, child) => {
@@ -414,7 +428,20 @@ function initSortable() {
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    const listItems = document.querySelectorAll('#field-list > li');
+    function getClosestPage(y) {
+        const pages = [...fieldList.querySelectorAll('li[data-type="page"]')];
+        return pages.reduce((closest, page) => {
+            const box = page.getBoundingClientRect();
+            const offset = y - box.top - box.height;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: page };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    const listItems = document.querySelectorAll('#field-list li');
     listItems.forEach(item => {
         item.setAttribute('draggable', 'true');
     });
