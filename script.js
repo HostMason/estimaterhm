@@ -101,25 +101,13 @@ function toggleFieldMenu() {
         // Adjust field options size based on hierarchy tree
         const hierarchyTreeRect = hierarchyTree.getBoundingClientRect();
         fieldOptions.style.width = `${hierarchyTreeRect.width}px`;
-        
-        // Adjust grid columns based on available width
-        const optionWidth = 70; // Approximate width of each option including gap
-        const columns = Math.floor(hierarchyTreeRect.width / optionWidth);
-        fieldOptions.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
     } else {
         fieldOptions.classList.add('hidden');
         fieldOptions.style.display = 'none';
     }
 }
 
-// Add window resize event listener to adjust field options when window is resized
-window.addEventListener('resize', function() {
-    const fieldOptions = document.getElementById('field-options');
-    if (!fieldOptions.classList.contains('hidden')) {
-        toggleFieldMenu();
-        toggleFieldMenu();
-    }
-});
+// Remove the window resize event listener as it's no longer needed
 
 // Select a field
 function selectField(field) {
