@@ -1,6 +1,5 @@
 // Global variables
 let formState = {
-    fieldCount: 0,
     selectedField: null
 };
 
@@ -47,7 +46,6 @@ function createFieldElement(field) {
 
 // Add a new field to the form
 function addField(type) {
-    formState.fieldCount++;
     const field = createFieldObject(type);
     const listItem = createFieldListItem(field);
     document.getElementById('field-list').appendChild(listItem);
@@ -60,9 +58,9 @@ function addField(type) {
 // Create a field object
 function createFieldObject(type) {
     return {
-        id: `field-${formState.fieldCount}`,
+        id: `field-${Date.now()}`, // Use timestamp for unique ID
         type: type,
-        label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${formState.fieldCount}`
+        label: `${type.charAt(0).toUpperCase() + type.slice(1)}`
     };
 }
 
@@ -115,28 +113,8 @@ function removeField(fieldId) {
     const listItem = document.querySelector(`#field-list li[data-id="${fieldId}"]`);
     if (listItem) {
         listItem.remove();
-        updateFieldNumbers();
         renderForm();
     }
-}
-
-// Update field numbers after removing a field
-function updateFieldNumbers() {
-    const fields = document.querySelectorAll('#field-list > li');
-    let maxNumber = 0;
-
-    fields.forEach(field => {
-        const label = field.querySelector('span').textContent;
-        const match = label.match(/\d+$/);
-        if (match) {
-            const number = parseInt(match[0], 10);
-            if (number > maxNumber) {
-                maxNumber = number;
-            }
-        }
-    });
-
-    formState.fieldCount = maxNumber;
 }
 
 function getInputHtml(type, id) {
