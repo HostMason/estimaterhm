@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     startBuildingBtn.addEventListener('click', function() {
         formSettings.style = document.getElementById('form-style').value;
         formSettings.enablePages = document.getElementById('enable-pages').value === 'true';
+        formSettings.progressBarType = document.getElementById('progress-bar-type').value;
         
         layoutQuestions.style.display = 'none';
         builderContainer.style.display = 'flex';
@@ -41,7 +42,19 @@ function updateFormBasedOnSettings() {
         addPageBtn.style.display = 'none';
     }
     
-    // Additional logic to change the form structure based on the settings can be added here
+    // Apply form style
+    document.getElementById('custom-form').className = formSettings.style + '-style';
+    
+    // Update progress bar (if implemented)
+    updateProgressBar();
+    
+    renderForm();
+}
+
+function updateProgressBar() {
+    // Implement progress bar logic based on formSettings.progressBarType
+    // This is a placeholder for future implementation
+    console.log('Progress bar type:', formSettings.progressBarType);
 }
 
 function addPage() {
@@ -221,7 +234,7 @@ function generateEmbedCode() {
     const formHtml = document.getElementById('custom-form').innerHTML;
     const embedCode = `
 <div id="embedded-form-container" class="${formSettings.style}-style">
-    <form id="embedded-form" data-enable-pages="${formSettings.enablePages}">
+    <form id="embedded-form" data-enable-pages="${formSettings.enablePages}" data-progress-bar-type="${formSettings.progressBarType}">
         ${formHtml}
     </form>
 </div>
@@ -229,9 +242,14 @@ function generateEmbedCode() {
 (function() {
     const form = document.getElementById('embedded-form');
     const enablePages = form.dataset.enablePages === 'true';
+    const progressBarType = form.dataset.progressBarType;
 
     if (enablePages) {
         // Implement pagination logic here
+    }
+
+    if (progressBarType !== 'none') {
+        // Implement progress bar logic here
     }
 
     form.onsubmit = function(e) {
