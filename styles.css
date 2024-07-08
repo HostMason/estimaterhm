@@ -295,7 +295,7 @@ input, textarea, select {
     margin-top: 20px;
 }
 
-.button-container {
+.button-container, .multi-button-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -314,6 +314,65 @@ input, textarea, select {
 
 .upload-image-btn:hover {
     background-color: #e9ecef;
+}
+
+.multi-button {
+    margin: 5px;
+    text-align: center;
+}
+
+.multi-button input[type="radio"],
+.multi-button input[type="checkbox"] {
+    display: none;
+}
+
+.multi-button label {
+    display: inline-block;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.multi-button input:checked + label {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.button-image {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Button and image sizes */
+.small {
+    font-size: 12px;
+    padding: 5px 10px;
+}
+
+.medium {
+    font-size: 16px;
+    padding: 8px 16px;
+}
+
+.large {
+    font-size: 20px;
+    padding: 10px 20px;
+}
+
+img.small {
+    max-width: 50px;
+    max-height: 50px;
+}
+
+img.medium {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+img.large {
+    max-width: 150px;
+    max-height: 150px;
 }
 
 #field-settings-panel {

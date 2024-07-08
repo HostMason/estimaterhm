@@ -387,6 +387,7 @@ function configField(fieldId) {
                 `;
                 break;
             case 'button':
+            case 'multi-button':
                 settingsHtml += `
                     <label>Button Text:
                         <input type="text" id="button-text" value="${fieldLabel}">
@@ -401,7 +402,33 @@ function configField(fieldId) {
                     <label>Upload Image:
                         <input type="file" id="button-image" accept="image/*">
                     </label>
+                    <label>Image Size:
+                        <select id="image-size">
+                            <option value="small">Small</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </label>
+                    <label>Button Size:
+                        <select id="button-size">
+                            <option value="small">Small</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </label>
                 `;
+                if (fieldType === 'multi-button') {
+                    settingsHtml += `
+                        <label>Allow Multiple Selections:
+                            <input type="checkbox" id="allow-multiple">
+                        </label>
+                        <label>Number of Buttons:
+                            <input type="number" id="button-count" min="1" value="1">
+                        </label>
+                        <div id="button-options"></div>
+                        <button onclick="addButtonOption()">Add Button</button>
+                    `;
+                }
                 break;
         }
     }
@@ -529,10 +556,20 @@ function saveFieldSettings(fieldId) {
                     updateSliderField(previewField, sliderMin, sliderMax, sliderStep);
                     break;
                 case 'button':
+                case 'multi-button':
                     const buttonText = document.getElementById('button-text').value;
                     const buttonType = document.getElementById('button-type').value;
                     const buttonImage = document.getElementById('button-image').files[0];
-                    updateButtonField(previewField, buttonText, buttonType, buttonImage);
+                    const imageSize = document.getElementById('image-size').value;
+                    const buttonSize = document.getElementById('button-size').value;
+                    if (fieldType === 'button') {
+                        updateButtonField(previewField, buttonText, buttonType, buttonImage, imageSize, buttonSize);
+                    } else {
+                        const allowMultiple = document.getElementById('allow-multiple').checked;
+                        const buttonCount = document.getElementById('button-count').value;
+                        const buttonOptions = Array.from(document.querySelectorAll('#button-options input')).map(input => input.value);
+                        updateMultiButtonField(previewField, buttonOptions, allowMultiple, imageSize, buttonSize);
+                    }
                     break;
             }
         }
@@ -557,12 +594,14 @@ function updateFieldOptions(previewField, fieldType, options) {
     }
 }
 
-function updateButtonField(previewField, buttonText, buttonType, buttonImage) {
+function updateButtonField(previewField, buttonText, buttonType, buttonImage, imageSize, buttonSize) {
     const button = previewField.querySelector('button');
     button.textContent = buttonText || 'Button';
     button.type = buttonType || 'button';
+    button.className = buttonSize;
 
     const img = previewField.querySelector('img');
+    img.className = imageSize;
     if (buttonImage) {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -736,10 +775,16 @@ function getInputHtml(type, id) {
         case 'button':
             return `
                 <div class="button-container">
-                    <img id="${id}_image" src="" alt="Button image" style="display: none; max-width: 100%; margin-bottom: 10px;">
+                    <img id="${id}_image" src="" alt="Button image" style="display: none; margin-bottom: 10px;">
                     <input type="file" id="${id}_file" accept="image/*" style="display: none;">
                     <label for="${id}_file" class="upload-image-btn">Upload Image</label>
                     <button type="button" id="${id}">Button</button>
+                </div>
+            `;
+        case 'multi-button':
+            return `
+                <div class="multi-button-container" id="${id}">
+                    <!-- Buttons will be dynamically added here -->
                 </div>
             `;
         default:
@@ -1002,4 +1047,32 @@ function updateSliderField(previewField, min, max, step) {
     sliderInput.min = min;
     sliderInput.max = max;
     sliderInput.step = step;
+}
+function updateMultiButtonField(previewField, buttonOptions, allowMultiple, imageSize, buttonSize) {
+    const container = previewField.querySelector('.multi-button-container');
+    container.innerHTML = '';
+    const inputType = allowMultiple ? 'checkbox' : 'radio';
+    
+    buttonOptions.forEach((option, index) => {
+        const button = document.createElement('div');
+        button.className = `multi-button ${buttonSize}`;
+        button.innerHTML = `
+            <input type="${inputType}" id="${previewField.id}_${index}" name="${previewField.id}" value="${option}">
+            <label for="${previewField.id}_${index}">
+                <img src="" alt="${option}" class="button-image ${imageSize}">
+                <span>${option}</span>
+            </label>
+        `;
+        container.appendChild(button);
+    });
+}
+
+function addButtonOption() {
+    const optionsContainer = document.getElementById('button-options');
+    const newOption = document.createElement('div');
+    newOption.innerHTML = `
+        <input type="text" value="New Button">
+        <button onclick="this.parentElement.remove()">Remove</button>
+    `;
+    optionsContainer.appendChild(newOption);
 }
