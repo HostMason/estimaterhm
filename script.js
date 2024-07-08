@@ -559,27 +559,20 @@ function updateFieldOptions(previewField, fieldType, options) {
 
 function updateButtonField(previewField, buttonText, buttonType, buttonImage) {
     const button = previewField.querySelector('button');
-    button.textContent = buttonText;
-    button.type = buttonType;
+    button.textContent = buttonText || 'Button';
+    button.type = buttonType || 'button';
 
+    const img = previewField.querySelector('img');
     if (buttonImage) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const img = previewField.querySelector('img') || document.createElement('img');
             img.src = e.target.result;
             img.style.display = 'block';
-            img.style.maxWidth = '100%';
-            img.style.marginBottom = '10px';
-            if (!previewField.contains(img)) {
-                previewField.insertBefore(img, button);
-            }
         }
         reader.readAsDataURL(buttonImage);
     } else {
-        const existingImg = previewField.querySelector('img');
-        if (existingImg) {
-            existingImg.remove();
-        }
+        img.style.display = 'none';
+        img.src = '';
     }
 }
 
@@ -746,8 +739,7 @@ function getInputHtml(type, id) {
                     <img id="${id}_image" src="" alt="Button image" style="display: none; max-width: 100%; margin-bottom: 10px;">
                     <input type="file" id="${id}_file" accept="image/*" style="display: none;">
                     <label for="${id}_file" class="upload-image-btn">Upload Image</label>
-                    <input type="text" id="${id}_text" name="${id}_text" placeholder="Button Text">
-                    <button type="button" id="${id}">${field.label}</button>
+                    <button type="button" id="${id}">Button</button>
                 </div>
             `;
         default:
