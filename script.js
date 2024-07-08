@@ -1,6 +1,7 @@
 // Global variables
 let formState = {
-    selectedField: null
+    selectedField: null,
+    selectedPage: null
 };
 
 // Main initialization function
@@ -108,6 +109,7 @@ function addField(type) {
     
     if (type === 'page') {
         document.getElementById('field-list').appendChild(listItem);
+        selectPage(field);
     } else {
         const pages = document.querySelectorAll('#field-list > li[data-type="page"]');
         if (pages.length === 0) {
@@ -116,8 +118,13 @@ function addField(type) {
             const defaultPageItem = createFieldListItem(defaultPage);
             document.getElementById('field-list').appendChild(defaultPageItem);
             defaultPageItem.querySelector('ul').appendChild(listItem);
+            selectPage(defaultPage);
+        } else if (formState.selectedPage) {
+            // Add the field to the selected page
+            const selectedPageItem = document.querySelector(`#field-list > li[data-id="${formState.selectedPage.id}"]`);
+            selectedPageItem.querySelector('ul').appendChild(listItem);
         } else {
-            // Add the field to the last page
+            // If no page is selected, add to the last page
             const lastPage = pages[pages.length - 1];
             lastPage.querySelector('ul').appendChild(listItem);
         }
@@ -145,7 +152,7 @@ function createFieldListItem(field) {
     if (field.type === 'page') {
         listItem.innerHTML = `
             <div class="field-header">
-                <span class="field-icon">📄</span>
+                <span class="field-icon">${field.icon || '📄'}</span>
                 <span class="field-label" contenteditable="true">${field.label}</span>
                 <div class="field-actions">
                     <button class="config-btn" onclick="configField('${field.id}')">⚙</button>
@@ -154,6 +161,11 @@ function createFieldListItem(field) {
             </div>
             <ul class="page-fields sortable-list"></ul>
         `;
+        listItem.querySelector('.field-header').onclick = (e) => {
+            if (!e.target.closest('.field-actions')) {
+                selectPage(field);
+            }
+        };
     } else {
         listItem.innerHTML = `
             <div class="field-header">
@@ -165,13 +177,15 @@ function createFieldListItem(field) {
                 </div>
             </div>
         `;
+        listItem.querySelector('.field-header').onclick = (e) => {
+            if (!e.target.closest('.field-actions')) {
+                selectField(field);
+            }
+        };
     }
     listItem.setAttribute('data-id', field.id);
     listItem.setAttribute('data-type', field.type);
     listItem.setAttribute('draggable', 'true');
-    listItem.querySelector('.field-label').onclick = (e) => {
-        selectField(field);
-    };
     return listItem;
 }
 
@@ -212,36 +226,50 @@ function configField(fieldId) {
         <label>Field Label:
             <input type="text" id="field-label" value="${fieldLabel}">
         </label>
-        <label>Placeholder:
-            <input type="text" id="field-placeholder" value="">
-        </label>
     `;
 
-    switch(fieldType) {
-        case 'radio':
-        case 'checkbox':
-        case 'select':
-            settingsHtml += `
-                <h4>Options</h4>
-                <div id="options-container">
-                    <div class="option-row">
-                        <input type="text" class="option-value" value="Option 1">
-                        <button onclick="removeOption(this)">Remove</button>
+    if (fieldType === 'page') {
+        settingsHtml += `
+            <label>Page Icon:
+                <input type="text" id="page-icon" value="${field.querySelector('.field-icon').textContent}">
+            </label>
+            <label>Page Header:
+                <input type="text" id="page-header" value="${fieldLabel}">
+            </label>
+        `;
+    } else {
+        settingsHtml += `
+            <label>Placeholder:
+                <input type="text" id="field-placeholder" value="">
+            </label>
+        `;
+
+        switch(fieldType) {
+            case 'radio':
+            case 'checkbox':
+            case 'select':
+                settingsHtml += `
+                    <h4>Options</h4>
+                    <div id="options-container">
+                        <div class="option-row">
+                            <input type="text" class="option-value" value="Option 1">
+                            <button onclick="removeOption(this)">Remove</button>
+                        </div>
                     </div>
-                </div>
-                <button onclick="addOption()">Add Option</button>
-            `;
-            break;
-        case 'button':
-            settingsHtml += `
-                <label>Button Text:
-                    <input type="text" id="button-text" value="${fieldLabel}">
-                </label>
-                <label>Upload Image:
-                    <input type="file" id="button-image" accept="image/*">
-                </label>
-            `;
-            break;
+                    <button onclick="addOption()">Add Option</button>
+                `;
+                break;
+            case 'button':
+                settingsHtml += `
+                    <label>Button Text:
+                        <input type="text" id="button-text" value="${fieldLabel}">
+                    </label>
+                    <label>Upload Image:
+                        <input type="file" id="button-image" accept="image/*">
+                    </label>
+                `;
+                break;
+        }
     }
 
     settingsHtml += `
@@ -273,30 +301,39 @@ function saveFieldSettings(fieldId) {
     const field = document.querySelector(`[data-id="${fieldId}"]`);
     const fieldType = field.getAttribute('data-type');
     const newLabel = document.getElementById('field-label').value;
-    const placeholder = document.getElementById('field-placeholder').value;
 
     field.querySelector('.field-label').textContent = newLabel;
 
-    // Update the form preview
-    const previewField = document.querySelector(`#field-block-${fieldId}`);
-    if (previewField) {
-        previewField.querySelector('label').textContent = newLabel + ':';
-        const input = previewField.querySelector('input, textarea, select');
-        if (input) {
-            input.placeholder = placeholder;
-        }
+    if (fieldType === 'page') {
+        const newIcon = document.getElementById('page-icon').value;
+        const newHeader = document.getElementById('page-header').value;
+        field.querySelector('.field-icon').textContent = newIcon;
+        field.querySelector('.field-label').textContent = newHeader;
+    } else {
+        const placeholder = document.getElementById('field-placeholder').value;
 
-        if (fieldType === 'radio' || fieldType === 'checkbox' || fieldType === 'select') {
-            const options = Array.from(document.querySelectorAll('.option-value')).map(opt => opt.value);
-            updateFieldOptions(previewField, fieldType, options);
-        } else if (fieldType === 'button') {
-            const buttonText = document.getElementById('button-text').value;
-            const buttonImage = document.getElementById('button-image').files[0];
-            updateButtonField(previewField, buttonText, buttonImage);
+        // Update the form preview
+        const previewField = document.querySelector(`#field-block-${fieldId}`);
+        if (previewField) {
+            previewField.querySelector('label').textContent = newLabel + ':';
+            const input = previewField.querySelector('input, textarea, select');
+            if (input) {
+                input.placeholder = placeholder;
+            }
+
+            if (fieldType === 'radio' || fieldType === 'checkbox' || fieldType === 'select') {
+                const options = Array.from(document.querySelectorAll('.option-value')).map(opt => opt.value);
+                updateFieldOptions(previewField, fieldType, options);
+            } else if (fieldType === 'button') {
+                const buttonText = document.getElementById('button-text').value;
+                const buttonImage = document.getElementById('button-image').files[0];
+                updateButtonField(previewField, buttonText, buttonImage);
+            }
         }
     }
 
     closeFieldSettings();
+    renderForm();
 }
 
 function updateFieldOptions(previewField, fieldType, options) {
@@ -387,10 +424,24 @@ function selectField(field) {
     highlightSelectedField(field.id);
 }
 
+// Select a page
+function selectPage(page) {
+    formState.selectedPage = page;
+    renderForm();
+    highlightSelectedPage(page.id);
+}
+
 // Highlight the selected field in the list
 function highlightSelectedField(fieldId) {
     document.querySelectorAll('#field-list li').forEach(item => {
         item.classList.toggle('selected', item.getAttribute('data-id') === fieldId);
+    });
+}
+
+// Highlight the selected page in the list
+function highlightSelectedPage(pageId) {
+    document.querySelectorAll('#field-list > li[data-type="page"]').forEach(item => {
+        item.classList.toggle('selected-page', item.getAttribute('data-id') === pageId);
     });
 }
 

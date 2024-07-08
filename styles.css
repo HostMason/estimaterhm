@@ -96,6 +96,11 @@ body {
     color: white;
 }
 
+.field-item.selected-page {
+    background-color: #e0e0ff;
+    border-left: 3px solid var(--accent-color);
+}
+
 .field-header {
     display: flex;
     justify-content: space-between;
