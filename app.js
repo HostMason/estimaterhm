@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 
 const app = express();
 const port = 3000;
@@ -14,70 +14,70 @@ app.use(session({
     saveUninitialized: true
 }));
 
-// Connect to SQLite database
-const db = new sqlite3.Database('./users.db', (err) => {
-    if (err) {
-        console.error(err.message);
-    }
-    console.log('Connected to the users database.');
+// Connect to PostgreSQL database
+const pool = new Pool({
+    user: 'your_username',
+    host: 'localhost',
+    database: 'your_database',
+    password: 'your_password',
+    port: 5432,
 });
 
 // Create users table if not exists
-db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    password TEXT
-)`);
+pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL
+    )
+`, (err, res) => {
+    if (err) {
+        console.error('Error creating users table:', err);
+    } else {
+        console.log('Users table created or already exists');
+    }
+});
 
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
     const { username, password } = req.body;
     
-    db.get('SELECT * FROM users WHERE username = ?', [username], (err, row) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error checking username' });
-        }
-        if (row) {
+    try {
+        const userCheck = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (userCheck.rows.length > 0) {
             return res.status(400).json({ message: 'Username already exists' });
         }
         
-        bcrypt.hash(password, 10, (err, hash) => {
-            if (err) {
-                return res.status(500).json({ message: 'Error hashing password' });
-            }
-            
-            db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, hash], (err) => {
-                if (err) {
-                    return res.status(500).json({ message: 'Error creating user' });
-                }
-                res.status(201).json({ message: 'User created successfully' });
-            });
-        });
-    });
+        const hash = await bcrypt.hash(password, 10);
+        await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hash]);
+        res.status(201).json({ message: 'User created successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error creating user' });
+    }
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     
-    db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error finding user' });
-        }
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const user = result.rows[0];
+        
         if (!user) {
             return res.status(401).json({ message: 'Invalid username or password' });
         }
         
-        bcrypt.compare(password, user.password, (err, result) => {
-            if (err) {
-                return res.status(500).json({ message: 'Error comparing passwords' });
-            }
-            if (result) {
-                req.session.userId = user.id;
-                res.json({ message: 'Logged in successfully' });
-            } else {
-                res.status(401).json({ message: 'Invalid username or password' });
-            }
-        });
-    });
+        const match = await bcrypt.compare(password, user.password);
+        if (match) {
+            req.session.userId = user.id;
+            res.json({ message: 'Logged in successfully' });
+        } else {
+            res.status(401).json({ message: 'Invalid username or password' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error logging in' });
+    }
 });
 
 app.post('/logout', (req, res) => {
