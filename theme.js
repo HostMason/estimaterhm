@@ -2,15 +2,18 @@ let currentTheme = {
     backgroundColor: '#ffffff',
     textColor: '#000000',
     accentColor: '#007bff',
-    fontFamily: 'Arial, sans-serif'
+    secondaryColor: '#6c757d',
+    successColor: '#28a745',
+    dangerColor: '#dc3545',
+    fontFamily: 'Inter, Arial, sans-serif'
 };
 
 function applyTheme(theme) {
     currentTheme = { ...currentTheme, ...theme };
-    document.documentElement.style.setProperty('--background-color', currentTheme.backgroundColor);
-    document.documentElement.style.setProperty('--text-color', currentTheme.textColor);
-    document.documentElement.style.setProperty('--accent-color', currentTheme.accentColor);
-    document.documentElement.style.setProperty('--font-family', currentTheme.fontFamily);
+    Object.keys(currentTheme).forEach(key => {
+        document.documentElement.style.setProperty(`--${key}`, currentTheme[key]);
+    });
+    saveTheme();
 }
 
 function loadThemeFromZip(file) {
@@ -26,9 +29,15 @@ function loadThemeFromZip(file) {
     reader.readAsArrayBuffer(file);
 }
 
-function removeBlock(blockId) {
-    const block = document.getElementById(blockId);
-    if (block) {
-        block.remove();
+function saveTheme() {
+    localStorage.setItem('currentTheme', JSON.stringify(currentTheme));
+}
+
+function loadSavedTheme() {
+    const savedTheme = localStorage.getItem('currentTheme');
+    if (savedTheme) {
+        applyTheme(JSON.parse(savedTheme));
     }
 }
+
+document.addEventListener('DOMContentLoaded', loadSavedTheme);

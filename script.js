@@ -2,7 +2,8 @@
 let formState = {
     selectedField: null,
     selectedPage: null,
-    fields: []
+    fields: [],
+    forms: []
 };
 
 // Main initialization function
@@ -25,6 +26,23 @@ function initFormBuilder() {
 
     // Set up navigation
     setupNavigation();
+
+    // Load saved state if available
+    loadSavedState();
+}
+
+// Load saved state from localStorage
+function loadSavedState() {
+    const savedState = localStorage.getItem('formBuilderState');
+    if (savedState) {
+        formState = JSON.parse(savedState);
+        renderForm();
+    }
+}
+
+// Save current state to localStorage
+function saveState() {
+    localStorage.setItem('formBuilderState', JSON.stringify(formState));
 }
 
 // Set up all event listeners
