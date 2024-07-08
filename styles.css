@@ -9,14 +9,15 @@
     --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --border-radius: 0.5rem;
     --transition: all 0.3s ease;
+    --sidebar-width: 250px;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --background-color: #ffffff;
-        --text-color: #000000;
+        --background-color: #1a202c;
+        --text-color: #ffffff;
         --accent-color: #4299e1;
-        --secondary-color: #64748b;
+        --secondary-color: #a0aec0;
     }
 }
 
@@ -32,41 +33,38 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-@media (max-width: 768px) {
-    body {
-        font-size: 14px;
-    }
+#app-container {
+    display: flex;
+    min-height: 100vh;
 }
 
-#navbar {
+#sidebar {
+    width: var(--sidebar-width);
     background-color: #ffffff;
     color: var(--text-color);
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 1rem;
     box-shadow: var(--box-shadow);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
 }
 
-#navbar h1 {
-    margin: 0;
+#sidebar h1 {
+    margin: 0 0 2rem 0;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--accent-color);
     font-size: 1.5rem;
+    text-align: center;
 }
 
 #nav-menu {
-    display: flex;
     list-style-type: none;
-    margin: 0;
     padding: 0;
+    margin: 0;
 }
 
 #nav-menu li {
-    margin: 0 1rem;
+    margin-bottom: 0.5rem;
 }
 
 #nav-menu a {
@@ -76,6 +74,7 @@ body {
     padding: 0.5rem 1rem;
     border-radius: var(--border-radius);
     transition: var(--transition);
+    display: block;
 }
 
 #nav-menu a:hover, #nav-menu a.active {
@@ -84,11 +83,13 @@ body {
 }
 
 #auth-buttons {
+    margin-top: 2rem;
     display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 
-#login-btn, #register-btn, #logout-btn, #settings-btn {
+#login-btn, #register-btn, #logout-btn {
     background-color: var(--accent-color);
     color: white;
     border: none;
@@ -102,9 +103,31 @@ body {
     letter-spacing: 0.05em;
 }
 
-#login-btn:hover, #register-btn:hover, #logout-btn:hover, #settings-btn:hover {
+#login-btn:hover, #register-btn:hover, #logout-btn:hover {
     background-color: #2563eb;
     transform: translateY(-1px);
+}
+
+#main-content {
+    flex-grow: 1;
+    margin-left: var(--sidebar-width);
+    padding: 2rem;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    #main-content {
+        margin-left: 0;
+    }
+
+    body {
+        font-size: 14px;
+    }
 }
 
 .modal {

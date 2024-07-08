@@ -3,162 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Form Builder</title>
+    <title>Hostmason</title>
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </head>
 <body>
-    <nav id="navbar">
-        <h1>Custom Form Builder</h1>
-        <ul id="nav-menu">
-            <li><a href="#" id="nav-builder" class="active">Builder</a></li>
-            <li><a href="#" id="nav-forms">Forms</a></li>
-            <li><a href="#" id="nav-submissions">Submissions</a></li>
-        </ul>
-        <div id="auth-buttons">
-            <button id="login-btn">Login</button>
-            <button id="register-btn">Register</button>
-            <button id="logout-btn" style="display: none;">Logout</button>
-        </div>
-        <button id="settings-btn">Settings</button>
-    </nav>
-    <div id="content">
-        <div id="builder-content" class="content-section active">
-            <!-- Existing builder content goes here -->
-        </div>
-        <div id="forms-content" class="content-section">
-            <h2>Your Forms</h2>
-            <ul id="form-list"></ul>
-        </div>
-        <div id="submissions-content" class="content-section">
-            <h2>Form Submissions</h2>
-            <select id="form-select">
-                <option value="">Select a form</option>
-            </select>
-            <table id="submissions-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Form</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-    <div id="form-builder">
-        <div id="builder-container">
-            <div id="hierarchy-tree">
-                <h2>Form Structure</h2>
-                <ul id="field-list" class="sortable-list"></ul>
-                <div id="field-menu">
-                    <button id="add-field-btn">Add Field</button>
-                    <button id="add-page-btn">Add Page</button>
-                    <div id="field-options" class="hidden">
-                        <div class="field-option" onclick="addField('name')">
-                            <i class="fas fa-user"></i>
-                            <span>Name</span>
-                        </div>
-                        <div class="field-option" onclick="addField('email')">
-                            <i class="fas fa-envelope"></i>
-                            <span>Email</span>
-                        </div>
-                        <div class="field-option" onclick="addField('phone')">
-                            <i class="fas fa-phone"></i>
-                            <span>Phone</span>
-                        </div>
-                        <div class="field-option" onclick="addField('address')">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Address</span>
-                        </div>
-                        <div class="field-option" onclick="addField('website')">
-                            <i class="fas fa-globe"></i>
-                            <span>Website</span>
-                        </div>
-                        <div class="field-option" onclick="addField('text')">
-                            <i class="fas fa-font"></i>
-                            <span>Input</span>
-                        </div>
-                        <div class="field-option" onclick="addField('textarea')">
-                            <i class="fas fa-align-left"></i>
-                            <span>Textarea</span>
-                        </div>
-                        <div class="field-option" onclick="addField('number')">
-                            <i class="fas fa-hashtag"></i>
-                            <span>Number</span>
-                        </div>
-                        <div class="field-option" onclick="addField('radio')">
-                            <i class="fas fa-dot-circle"></i>
-                            <span>Radio</span>
-                        </div>
-                        <div class="field-option" onclick="addField('checkbox')">
-                            <i class="fas fa-check-square"></i>
-                            <span>Checkbox</span>
-                        </div>
-                        <div class="field-option" onclick="addField('calculations')">
-                            <i class="fas fa-calculator"></i>
-                            <span>Calculations</span>
-                        </div>
-                        <div class="field-option" onclick="addField('select')">
-                            <i class="fas fa-caret-square-down"></i>
-                            <span>Select</span>
-                        </div>
-                        <div class="field-option" onclick="addField('date')">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>Datepicker</span>
-                        </div>
-                        <div class="field-option" onclick="addField('time')">
-                            <i class="fas fa-clock"></i>
-                            <span>Timepicker</span>
-                        </div>
-                        <div class="field-option" onclick="addField('html')">
-                            <i class="fas fa-code"></i>
-                            <span>HTML</span>
-                        </div>
-                        <div class="field-option" onclick="addField('page')">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Page</span>
-                        </div>
-                        <div class="field-option" onclick="addField('hidden')">
-                            <i class="fas fa-eye-slash"></i>
-                            <span>Hidden Field</span>
-                        </div>
-                        <div class="field-option" onclick="addField('section')">
-                            <i class="fas fa-folder"></i>
-                            <span>Section</span>
-                        </div>
-                        <div class="field-option" onclick="addField('fieldgroup')">
-                            <i class="fas fa-object-group"></i>
-                            <span>Field Group</span>
-                        </div>
-                        <div class="field-option" onclick="addField('slider')">
-                            <i class="fas fa-sliders-h"></i>
-                            <span>Slider</span>
-                        </div>
-                        <div class="field-option" onclick="addField('button')">
-                            <i class="fas fa-square"></i>
-                            <span>Button</span>
-                        </div>
-                        <div class="field-option" onclick="addField('multi-button')">
-                            <i class="fas fa-th-large"></i>
-                            <span>Multi Button</span>
-                        </div>
-                    </div>
-                </div>
+    <div id="app-container">
+        <nav id="sidebar">
+            <h1>Hostmason</h1>
+            <ul id="nav-menu">
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/form-builder">Form Builder</a></li>
+                <li><a href="/forms">Forms</a></li>
+                <li><a href="/submissions">Submissions</a></li>
+                <li><a href="/settings">Settings</a></li>
+            </ul>
+            <div id="auth-buttons">
+                <button id="login-btn">Login</button>
+                <button id="register-btn">Register</button>
+                <button id="logout-btn" style="display: none;">Logout</button>
             </div>
-            <div id="form-preview">
-                <form id="custom-form"></form>
+        </nav>
+        <main id="main-content">
+            <div id="content">
+                <!-- Content will be dynamically loaded here -->
             </div>
-            <div id="field-settings-panel" style="display: none;"></div>
-        </div>
-        <button id="generate-embed-code">Generate Embed Code</button>
-        <textarea id="embed-code" readonly></textarea>
+        </main>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-    <script src="theme.js"></script>
-    <script src="script.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/main.js"></script>
 </body>
 </html>
