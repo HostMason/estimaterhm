@@ -605,10 +605,20 @@ function updateButtonField(previewField, buttonText, buttonType, buttonImage, im
     if (buttonImage) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            img.src = e.target.result;
-            img.style.display = 'block';
+            const sourceImg = new Image();
+            sourceImg.onload = function() {
+                resizeAndDisplayImage(sourceImg, img, imageSize);
+            }
+            sourceImg.src = e.target.result;
+            img.dataset.originalSrc = e.target.result;
         }
         reader.readAsDataURL(buttonImage);
+    } else if (img.dataset.originalSrc) {
+        const sourceImg = new Image();
+        sourceImg.onload = function() {
+            resizeAndDisplayImage(sourceImg, img, imageSize);
+        }
+        sourceImg.src = img.dataset.originalSrc;
     } else {
         img.style.display = 'none';
         img.src = '';
@@ -802,32 +812,38 @@ function handleImageUpload(event) {
     reader.onload = function(e) {
         const img = new Image();
         img.onload = function() {
-            const canvas = document.createElement('canvas');
-            let width, height;
-            switch(sizeSelect.value) {
-                case 'small':
-                    width = height = 50;
-                    break;
-                case 'medium':
-                    width = height = 100;
-                    break;
-                case 'large':
-                    width = height = 150;
-                    break;
-            }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            image.src = canvas.toDataURL();
-            image.style.display = 'block';
+            resizeAndDisplayImage(img, image, sizeSelect.value);
         }
         img.src = e.target.result;
+        // Store the original image data for future resizing
+        image.dataset.originalSrc = e.target.result;
     }
 
     if (file) {
         reader.readAsDataURL(file);
     }
+}
+
+function resizeAndDisplayImage(sourceImg, targetImg, size) {
+    const canvas = document.createElement('canvas');
+    let width, height;
+    switch(size) {
+        case 'small':
+            width = height = 50;
+            break;
+        case 'medium':
+            width = height = 100;
+            break;
+        case 'large':
+            width = height = 150;
+            break;
+    }
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(sourceImg, 0, 0, width, height);
+    targetImg.src = canvas.toDataURL();
+    targetImg.style.display = 'block';
 }
 
 function generateEmbedCode() {
