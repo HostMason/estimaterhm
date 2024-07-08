@@ -310,3 +310,48 @@ input, textarea, select {
 .upload-image-btn:hover {
     background-color: #e9ecef;
 }
+
+#field-settings-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border: 1px solid var(--accent-color);
+    border-radius: 5px;
+    z-index: 1000;
+    max-width: 400px;
+    width: 100%;
+}
+
+#field-settings-panel h3 {
+    margin-top: 0;
+}
+
+#field-settings-panel label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+#field-settings-panel input[type="text"],
+#field-settings-panel input[type="file"] {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+#field-settings-panel button {
+    margin-top: 10px;
+}
+
+.option-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.option-row input {
+    flex-grow: 1;
+    margin-right: 10px;
+}

@@ -197,8 +197,139 @@ function getFieldIcon(type) {
 
 // Configure a field
 function configField(fieldId) {
-    console.log(`Configuring field: ${fieldId}`);
-    // Implement field configuration logic here
+    const field = document.querySelector(`[data-id="${fieldId}"]`);
+    const fieldType = field.getAttribute('data-type');
+    const fieldLabel = field.querySelector('.field-label').textContent;
+
+    let settingsHtml = `
+        <h3>Settings for ${fieldLabel}</h3>
+        <label>Field Label:
+            <input type="text" id="field-label" value="${fieldLabel}">
+        </label>
+        <label>Placeholder:
+            <input type="text" id="field-placeholder" value="">
+        </label>
+    `;
+
+    switch(fieldType) {
+        case 'radio':
+        case 'checkbox':
+        case 'select':
+            settingsHtml += `
+                <h4>Options</h4>
+                <div id="options-container">
+                    <div class="option-row">
+                        <input type="text" class="option-value" value="Option 1">
+                        <button onclick="removeOption(this)">Remove</button>
+                    </div>
+                </div>
+                <button onclick="addOption()">Add Option</button>
+            `;
+            break;
+        case 'button':
+            settingsHtml += `
+                <label>Button Text:
+                    <input type="text" id="button-text" value="${fieldLabel}">
+                </label>
+                <label>Upload Image:
+                    <input type="file" id="button-image" accept="image/*">
+                </label>
+            `;
+            break;
+    }
+
+    settingsHtml += `
+        <button onclick="saveFieldSettings('${fieldId}')">Save Settings</button>
+        <button onclick="closeFieldSettings()">Cancel</button>
+    `;
+
+    const settingsPanel = document.getElementById('field-settings-panel');
+    settingsPanel.innerHTML = settingsHtml;
+    settingsPanel.style.display = 'block';
+}
+
+function addOption() {
+    const optionsContainer = document.getElementById('options-container');
+    const newOption = document.createElement('div');
+    newOption.className = 'option-row';
+    newOption.innerHTML = `
+        <input type="text" class="option-value" value="New Option">
+        <button onclick="removeOption(this)">Remove</button>
+    `;
+    optionsContainer.appendChild(newOption);
+}
+
+function removeOption(button) {
+    button.parentElement.remove();
+}
+
+function saveFieldSettings(fieldId) {
+    const field = document.querySelector(`[data-id="${fieldId}"]`);
+    const fieldType = field.getAttribute('data-type');
+    const newLabel = document.getElementById('field-label').value;
+    const placeholder = document.getElementById('field-placeholder').value;
+
+    field.querySelector('.field-label').textContent = newLabel;
+
+    // Update the form preview
+    const previewField = document.querySelector(`#field-block-${fieldId}`);
+    if (previewField) {
+        previewField.querySelector('label').textContent = newLabel + ':';
+        const input = previewField.querySelector('input, textarea, select');
+        if (input) {
+            input.placeholder = placeholder;
+        }
+
+        if (fieldType === 'radio' || fieldType === 'checkbox' || fieldType === 'select') {
+            const options = Array.from(document.querySelectorAll('.option-value')).map(opt => opt.value);
+            updateFieldOptions(previewField, fieldType, options);
+        } else if (fieldType === 'button') {
+            const buttonText = document.getElementById('button-text').value;
+            const buttonImage = document.getElementById('button-image').files[0];
+            updateButtonField(previewField, buttonText, buttonImage);
+        }
+    }
+
+    closeFieldSettings();
+}
+
+function updateFieldOptions(previewField, fieldType, options) {
+    if (fieldType === 'select') {
+        const select = previewField.querySelector('select');
+        select.innerHTML = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+    } else {
+        const container = previewField.querySelector('.form-field');
+        container.innerHTML = options.map((opt, index) => `
+            <div>
+                <input type="${fieldType}" id="${previewField.id}_${index}" name="${previewField.id}" value="${opt}">
+                <label for="${previewField.id}_${index}">${opt}</label>
+            </div>
+        `).join('');
+    }
+}
+
+function updateButtonField(previewField, buttonText, buttonImage) {
+    const button = previewField.querySelector('button');
+    button.textContent = buttonText;
+
+    if (buttonImage) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = previewField.querySelector('img') || document.createElement('img');
+            img.src = e.target.result;
+            img.style.display = 'block';
+            img.style.maxWidth = '100%';
+            img.style.marginBottom = '10px';
+            if (!previewField.contains(img)) {
+                previewField.insertBefore(img, button);
+            }
+        }
+        reader.readAsDataURL(buttonImage);
+    }
+}
+
+function closeFieldSettings() {
+    document.getElementById('field-settings-panel').style.display = 'none';
 }
 
 // Toggle the field menu visibility
