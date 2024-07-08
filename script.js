@@ -7,6 +7,13 @@ let formState = {
 function initFormBuilder() {
     setupEventListeners();
     initSortable();
+    
+    // Add event listener for image upload
+    document.addEventListener('change', function(event) {
+        if (event.target && event.target.id.endsWith('_file')) {
+            handleImageUpload(event);
+        }
+    });
 }
 
 // Set up all event listeners
@@ -182,7 +189,8 @@ function getFieldIcon(type) {
         hidden: '👁️',
         section: '📂',
         fieldgroup: '🗃️',
-        slider: '🎚️'
+        slider: '🎚️',
+        button: '🔳'
     };
     return icons[type] || 'Aa';
 }
@@ -332,8 +340,34 @@ function getInputHtml(type, id) {
             return `<div id="${id}" class="field-group"></div>`;
         case 'slider':
             return `<input type="range" id="${id}" name="${id}" min="0" max="100">`;
+        case 'button':
+            return `
+                <div class="button-container">
+                    <img id="${id}_image" src="" alt="Button image" style="display: none; max-width: 100%; margin-bottom: 10px;">
+                    <input type="file" id="${id}_file" accept="image/*" style="display: none;">
+                    <label for="${id}_file" class="upload-image-btn">Upload Image</label>
+                    <input type="text" id="${id}_text" name="${id}_text" placeholder="Button Text">
+                    <button type="button" id="${id}">${field.label}</button>
+                </div>
+            `;
         default:
             return `<input type="text" id="${id}" name="${id}">`;
+    }
+}
+
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    const imageId = event.target.id.replace('_file', '_image');
+    const image = document.getElementById(imageId);
+
+    reader.onload = function(e) {
+        image.src = e.target.result;
+        image.style.display = 'block';
+    }
+
+    if (file) {
+        reader.readAsDataURL(file);
     }
 }
 
