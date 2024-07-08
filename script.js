@@ -242,9 +242,75 @@ function configField(fieldId) {
             <label>Placeholder:
                 <input type="text" id="field-placeholder" value="">
             </label>
+            <label>Required:
+                <input type="checkbox" id="field-required">
+            </label>
         `;
 
         switch(fieldType) {
+            case 'name':
+                settingsHtml += `
+                    <label>Show Middle Name:
+                        <input type="checkbox" id="show-middle-name">
+                    </label>
+                `;
+                break;
+            case 'email':
+                settingsHtml += `
+                    <label>Confirm Email:
+                        <input type="checkbox" id="confirm-email">
+                    </label>
+                `;
+                break;
+            case 'phone':
+                settingsHtml += `
+                    <label>Phone Format:
+                        <select id="phone-format">
+                            <option value="default">Default</option>
+                            <option value="us">US (xxx) xxx-xxxx</option>
+                            <option value="international">International</option>
+                        </select>
+                    </label>
+                `;
+                break;
+            case 'address':
+                settingsHtml += `
+                    <label>Show Address Line 2:
+                        <input type="checkbox" id="show-address-line-2">
+                    </label>
+                `;
+                break;
+            case 'website':
+                settingsHtml += `
+                    <label>URL Validation:
+                        <input type="checkbox" id="url-validation" checked>
+                    </label>
+                `;
+                break;
+            case 'text':
+            case 'textarea':
+                settingsHtml += `
+                    <label>Min Length:
+                        <input type="number" id="min-length" min="0">
+                    </label>
+                    <label>Max Length:
+                        <input type="number" id="max-length" min="0">
+                    </label>
+                `;
+                break;
+            case 'number':
+                settingsHtml += `
+                    <label>Min Value:
+                        <input type="number" id="min-value">
+                    </label>
+                    <label>Max Value:
+                        <input type="number" id="max-value">
+                    </label>
+                    <label>Step:
+                        <input type="number" id="step-value" step="any">
+                    </label>
+                `;
+                break;
             case 'radio':
             case 'checkbox':
             case 'select':
@@ -259,10 +325,78 @@ function configField(fieldId) {
                     <button onclick="addOption()">Add Option</button>
                 `;
                 break;
+            case 'date':
+                settingsHtml += `
+                    <label>Min Date:
+                        <input type="date" id="min-date">
+                    </label>
+                    <label>Max Date:
+                        <input type="date" id="max-date">
+                    </label>
+                `;
+                break;
+            case 'time':
+                settingsHtml += `
+                    <label>Min Time:
+                        <input type="time" id="min-time">
+                    </label>
+                    <label>Max Time:
+                        <input type="time" id="max-time">
+                    </label>
+                `;
+                break;
+            case 'html':
+                settingsHtml += `
+                    <label>HTML Content:
+                        <textarea id="html-content"></textarea>
+                    </label>
+                `;
+                break;
+            case 'hidden':
+                settingsHtml += `
+                    <label>Hidden Value:
+                        <input type="text" id="hidden-value">
+                    </label>
+                `;
+                break;
+            case 'section':
+                settingsHtml += `
+                    <label>Section Title:
+                        <input type="text" id="section-title">
+                    </label>
+                `;
+                break;
+            case 'fieldgroup':
+                settingsHtml += `
+                    <label>Group Title:
+                        <input type="text" id="group-title">
+                    </label>
+                `;
+                break;
+            case 'slider':
+                settingsHtml += `
+                    <label>Min Value:
+                        <input type="number" id="slider-min">
+                    </label>
+                    <label>Max Value:
+                        <input type="number" id="slider-max">
+                    </label>
+                    <label>Step:
+                        <input type="number" id="slider-step" step="any">
+                    </label>
+                `;
+                break;
             case 'button':
                 settingsHtml += `
                     <label>Button Text:
                         <input type="text" id="button-text" value="${fieldLabel}">
+                    </label>
+                    <label>Button Type:
+                        <select id="button-type">
+                            <option value="button">Button</option>
+                            <option value="submit">Submit</option>
+                            <option value="reset">Reset</option>
+                        </select>
                     </label>
                     <label>Upload Image:
                         <input type="file" id="button-image" accept="image/*">
@@ -311,23 +445,95 @@ function saveFieldSettings(fieldId) {
         field.querySelector('.field-label').textContent = newHeader;
     } else {
         const placeholder = document.getElementById('field-placeholder').value;
+        const required = document.getElementById('field-required').checked;
 
         // Update the form preview
         const previewField = document.querySelector(`#field-block-${fieldId}`);
         if (previewField) {
-            previewField.querySelector('label').textContent = newLabel + ':';
+            previewField.querySelector('label').textContent = newLabel + (required ? ' *' : '') + ':';
             const input = previewField.querySelector('input, textarea, select');
             if (input) {
                 input.placeholder = placeholder;
+                input.required = required;
             }
 
-            if (fieldType === 'radio' || fieldType === 'checkbox' || fieldType === 'select') {
-                const options = Array.from(document.querySelectorAll('.option-value')).map(opt => opt.value);
-                updateFieldOptions(previewField, fieldType, options);
-            } else if (fieldType === 'button') {
-                const buttonText = document.getElementById('button-text').value;
-                const buttonImage = document.getElementById('button-image').files[0];
-                updateButtonField(previewField, buttonText, buttonImage);
+            switch(fieldType) {
+                case 'name':
+                    const showMiddleName = document.getElementById('show-middle-name').checked;
+                    updateNameField(previewField, showMiddleName);
+                    break;
+                case 'email':
+                    const confirmEmail = document.getElementById('confirm-email').checked;
+                    updateEmailField(previewField, confirmEmail);
+                    break;
+                case 'phone':
+                    const phoneFormat = document.getElementById('phone-format').value;
+                    updatePhoneField(previewField, phoneFormat);
+                    break;
+                case 'address':
+                    const showAddressLine2 = document.getElementById('show-address-line-2').checked;
+                    updateAddressField(previewField, showAddressLine2);
+                    break;
+                case 'website':
+                    const urlValidation = document.getElementById('url-validation').checked;
+                    updateWebsiteField(previewField, urlValidation);
+                    break;
+                case 'text':
+                case 'textarea':
+                    const minLength = document.getElementById('min-length').value;
+                    const maxLength = document.getElementById('max-length').value;
+                    updateTextField(previewField, minLength, maxLength);
+                    break;
+                case 'number':
+                    const minValue = document.getElementById('min-value').value;
+                    const maxValue = document.getElementById('max-value').value;
+                    const step = document.getElementById('step-value').value;
+                    updateNumberField(previewField, minValue, maxValue, step);
+                    break;
+                case 'radio':
+                case 'checkbox':
+                case 'select':
+                    const options = Array.from(document.querySelectorAll('.option-value')).map(opt => opt.value);
+                    updateFieldOptions(previewField, fieldType, options);
+                    break;
+                case 'date':
+                    const minDate = document.getElementById('min-date').value;
+                    const maxDate = document.getElementById('max-date').value;
+                    updateDateField(previewField, minDate, maxDate);
+                    break;
+                case 'time':
+                    const minTime = document.getElementById('min-time').value;
+                    const maxTime = document.getElementById('max-time').value;
+                    updateTimeField(previewField, minTime, maxTime);
+                    break;
+                case 'html':
+                    const htmlContent = document.getElementById('html-content').value;
+                    updateHtmlField(previewField, htmlContent);
+                    break;
+                case 'hidden':
+                    const hiddenValue = document.getElementById('hidden-value').value;
+                    updateHiddenField(previewField, hiddenValue);
+                    break;
+                case 'section':
+                    const sectionTitle = document.getElementById('section-title').value;
+                    updateSectionField(previewField, sectionTitle);
+                    break;
+                case 'fieldgroup':
+                    const groupTitle = document.getElementById('group-title').value;
+                    updateFieldGroupField(previewField, groupTitle);
+                    break;
+                case 'slider':
+                    const sliderMin = document.getElementById('slider-min').value;
+                    const sliderMax = document.getElementById('slider-max').value;
+                    const sliderStep = document.getElementById('slider-step').value;
+                    updateSliderField(previewField, sliderMin, sliderMax, sliderStep);
+                    break;
+                case 'button':
+                    const buttonText = document.getElementById('button-text').value;
+                    const buttonType = document.getElementById('button-type').value;
+                    const buttonImage = document.getElementById('button-image').files[0];
+                    updateButtonField(previewField, buttonText, buttonType, buttonImage);
+                    break;
             }
         }
     }
@@ -351,9 +557,10 @@ function updateFieldOptions(previewField, fieldType, options) {
     }
 }
 
-function updateButtonField(previewField, buttonText, buttonImage) {
+function updateButtonField(previewField, buttonText, buttonType, buttonImage) {
     const button = previewField.querySelector('button');
     button.textContent = buttonText;
+    button.type = buttonType;
 
     if (buttonImage) {
         const reader = new FileReader();
@@ -368,6 +575,11 @@ function updateButtonField(previewField, buttonText, buttonImage) {
             }
         }
         reader.readAsDataURL(buttonImage);
+    } else {
+        const existingImg = previewField.querySelector('img');
+        if (existingImg) {
+            existingImg.remove();
+        }
     }
 }
 
@@ -693,4 +905,109 @@ function initSortable() {
     listItems.forEach(item => {
         item.setAttribute('draggable', 'true');
     });
+}
+function updateNameField(previewField, showMiddleName) {
+    const nameInputs = previewField.querySelectorAll('input[type="text"]');
+    if (showMiddleName && nameInputs.length === 2) {
+        const middleNameInput = document.createElement('input');
+        middleNameInput.type = 'text';
+        middleNameInput.placeholder = 'Middle Name';
+        nameInputs[0].insertAdjacentElement('afterend', middleNameInput);
+    } else if (!showMiddleName && nameInputs.length === 3) {
+        nameInputs[1].remove();
+    }
+}
+
+function updateEmailField(previewField, confirmEmail) {
+    const emailInputs = previewField.querySelectorAll('input[type="email"]');
+    if (confirmEmail && emailInputs.length === 1) {
+        const confirmEmailInput = document.createElement('input');
+        confirmEmailInput.type = 'email';
+        confirmEmailInput.placeholder = 'Confirm Email';
+        emailInputs[0].insertAdjacentElement('afterend', confirmEmailInput);
+    } else if (!confirmEmail && emailInputs.length === 2) {
+        emailInputs[1].remove();
+    }
+}
+
+function updatePhoneField(previewField, phoneFormat) {
+    const phoneInput = previewField.querySelector('input[type="tel"]');
+    switch(phoneFormat) {
+        case 'us':
+            phoneInput.pattern = '\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}';
+            phoneInput.placeholder = '(123) 456-7890';
+            break;
+        case 'international':
+            phoneInput.pattern = '\\+[0-9]{1,4} [0-9]{1,14}';
+            phoneInput.placeholder = '+1 1234567890';
+            break;
+        default:
+            phoneInput.pattern = '';
+            phoneInput.placeholder = '';
+    }
+}
+
+function updateAddressField(previewField, showAddressLine2) {
+    const addressInputs = previewField.querySelectorAll('input[type="text"]');
+    if (showAddressLine2 && addressInputs.length === 4) {
+        const addressLine2Input = document.createElement('input');
+        addressLine2Input.type = 'text';
+        addressLine2Input.placeholder = 'Address Line 2';
+        addressInputs[0].insertAdjacentElement('afterend', addressLine2Input);
+    } else if (!showAddressLine2 && addressInputs.length === 5) {
+        addressInputs[1].remove();
+    }
+}
+
+function updateWebsiteField(previewField, urlValidation) {
+    const websiteInput = previewField.querySelector('input[type="url"]');
+    websiteInput.pattern = urlValidation ? 'https?://.*' : '';
+}
+
+function updateTextField(previewField, minLength, maxLength) {
+    const textInput = previewField.querySelector('input[type="text"], textarea');
+    textInput.minLength = minLength;
+    textInput.maxLength = maxLength;
+}
+
+function updateNumberField(previewField, minValue, maxValue, step) {
+    const numberInput = previewField.querySelector('input[type="number"]');
+    numberInput.min = minValue;
+    numberInput.max = maxValue;
+    numberInput.step = step;
+}
+
+function updateDateField(previewField, minDate, maxDate) {
+    const dateInput = previewField.querySelector('input[type="date"]');
+    dateInput.min = minDate;
+    dateInput.max = maxDate;
+}
+
+function updateTimeField(previewField, minTime, maxTime) {
+    const timeInput = previewField.querySelector('input[type="time"]');
+    timeInput.min = minTime;
+    timeInput.max = maxTime;
+}
+
+function updateHtmlField(previewField, htmlContent) {
+    previewField.querySelector('div').innerHTML = htmlContent;
+}
+
+function updateHiddenField(previewField, hiddenValue) {
+    previewField.querySelector('input[type="hidden"]').value = hiddenValue;
+}
+
+function updateSectionField(previewField, sectionTitle) {
+    previewField.querySelector('legend').textContent = sectionTitle;
+}
+
+function updateFieldGroupField(previewField, groupTitle) {
+    previewField.querySelector('div').setAttribute('aria-label', groupTitle);
+}
+
+function updateSliderField(previewField, min, max, step) {
+    const sliderInput = previewField.querySelector('input[type="range"]');
+    sliderInput.min = min;
+    sliderInput.max = max;
+    sliderInput.step = step;
 }
