@@ -797,10 +797,32 @@ function handleImageUpload(event) {
     const reader = new FileReader();
     const imageId = event.target.id.replace('_file', '_image');
     const image = document.getElementById(imageId);
+    const sizeSelect = document.getElementById('image-size');
 
     reader.onload = function(e) {
-        image.src = e.target.result;
-        image.style.display = 'block';
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let width, height;
+            switch(sizeSelect.value) {
+                case 'small':
+                    width = height = 50;
+                    break;
+                case 'medium':
+                    width = height = 100;
+                    break;
+                case 'large':
+                    width = height = 150;
+                    break;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            image.src = canvas.toDataURL();
+            image.style.display = 'block';
+        }
+        img.src = e.target.result;
     }
 
     if (file) {
@@ -847,7 +869,11 @@ function generateEmbedCode() {
 
     form.onsubmit = function(e) {
         e.preventDefault();
-        const formData = new FormData(this);
+        submitForm(this);
+    };
+
+    function submitForm(form) {
+        const formData = new FormData(form);
         
         fetch('/submit-form', {
             method: 'POST',
@@ -855,13 +881,38 @@ function generateEmbedCode() {
         })
         .then(response => response.json())
         .then(data => {
-            alert('Form submitted successfully!');
+            if (data.success) {
+                alert('Form submitted successfully!');
+            } else if (data.subform) {
+                loadSubForm(data.subform);
+            } else {
+                alert('Form submission failed. Please try again.');
+            }
         })
         .catch(error => {
             console.error('Error:', error);
             alert('An error occurred while submitting the form.');
         });
-    };
+    }
+
+    function loadSubForm(subformUrl) {
+        fetch(subformUrl)
+        .then(response => response.text())
+        .then(html => {
+            const subformContainer = document.createElement('div');
+            subformContainer.innerHTML = html;
+            const subform = subformContainer.querySelector('form');
+            subform.onsubmit = function(e) {
+                e.preventDefault();
+                submitForm(this);
+            };
+            form.parentNode.replaceChild(subformContainer, form);
+        })
+        .catch(error => {
+            console.error('Error loading subform:', error);
+            alert('An error occurred while loading the subform.');
+        });
+    }
 })();
 </script>
     `;
@@ -1065,6 +1116,28 @@ function updateMultiButtonField(previewField, buttonOptions, allowMultiple, imag
         `;
         container.appendChild(button);
     });
+
+    // Add field button
+    const fieldButton = document.createElement('button');
+    fieldButton.textContent = 'Add Field';
+    fieldButton.onclick = () => addFieldToMultiButton(previewField.id);
+    container.appendChild(fieldButton);
+}
+
+function addFieldToMultiButton(multiButtonId) {
+    const container = document.querySelector(`#${multiButtonId} .multi-button-container`);
+    const index = container.querySelectorAll('.multi-button').length;
+    const newOption = `New Option ${index + 1}`;
+    const button = document.createElement('div');
+    button.className = `multi-button medium`;
+    button.innerHTML = `
+        <input type="radio" id="${multiButtonId}_${index}" name="${multiButtonId}" value="${newOption}">
+        <label for="${multiButtonId}_${index}">
+            <img src="" alt="${newOption}" class="button-image medium">
+            <span>${newOption}</span>
+        </label>
+    `;
+    container.insertBefore(button, container.lastChild);
 }
 
 function addButtonOption() {
