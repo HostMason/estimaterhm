@@ -57,7 +57,12 @@ function renderForm() {
             const nextButton = document.createElement('button');
             nextButton.textContent = 'Next';
             nextButton.className = 'next-page-btn';
-            nextButton.onclick = () => showPage(index + 1);
+            nextButton.setAttribute('data-preview', 'true');
+            nextButton.onclick = () => {
+                if (!nextButton.getAttribute('data-preview')) {
+                    showPage(index + 1);
+                }
+            };
             pageElement.appendChild(nextButton);
         }
 
@@ -513,6 +518,32 @@ function generateEmbedCode() {
 <script>
 (function() {
     const form = document.getElementById('embedded-form');
+    const pages = form.querySelectorAll('.form-page');
+    let currentPage = 0;
+
+    function showPage(pageIndex) {
+        pages.forEach((page, index) => {
+            page.style.display = index === pageIndex ? 'block' : 'none';
+        });
+    }
+
+    form.querySelectorAll('.next-page-btn').forEach(btn => {
+        btn.removeAttribute('data-preview');
+        btn.onclick = () => {
+            currentPage++;
+            showPage(currentPage);
+        };
+    });
+
+    form.querySelectorAll('.prev-page-btn').forEach(btn => {
+        btn.onclick = () => {
+            currentPage--;
+            showPage(currentPage);
+        };
+    });
+
+    showPage(0);
+
     form.onsubmit = function(e) {
         e.preventDefault();
         const formData = new FormData(this);
