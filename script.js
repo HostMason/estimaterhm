@@ -57,11 +57,9 @@ function renderForm() {
             const nextButton = document.createElement('button');
             nextButton.textContent = 'Next';
             nextButton.className = 'next-page-btn';
-            nextButton.setAttribute('data-preview', 'true');
-            nextButton.onclick = () => {
-                if (!nextButton.getAttribute('data-preview')) {
-                    showPage(index + 1);
-                }
+            nextButton.onclick = (e) => {
+                e.preventDefault();
+                showPage(index + 1);
             };
             pageElement.appendChild(nextButton);
         }
@@ -70,7 +68,10 @@ function renderForm() {
             const prevButton = document.createElement('button');
             prevButton.textContent = 'Previous';
             prevButton.className = 'prev-page-btn';
-            prevButton.onclick = () => showPage(index - 1);
+            prevButton.onclick = (e) => {
+                e.preventDefault();
+                showPage(index - 1);
+            };
             pageElement.appendChild(prevButton);
         }
     });
