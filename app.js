@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const { Pool } = require('pg');
+const path = require('path');
 
 const app = express();
 const port = 3000;
@@ -13,6 +14,9 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
+// Serve static files
+app.use(express.static('public'));
 
 // Connect to PostgreSQL database
 const pool = new Pool({
@@ -35,6 +39,23 @@ pool.query(`
         console.error('Error creating users table:', err);
     } else {
         console.log('Users table created or already exists');
+    }
+});
+
+// Serve index.html for the root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve page content
+app.get('/:page', (req, res) => {
+    const page = req.params.page;
+    const validPages = ['dashboard', 'form-builder', 'forms', 'submissions', 'settings'];
+    
+    if (validPages.includes(page)) {
+        res.sendFile(path.join(__dirname, 'views', `${page}.html`));
+    } else {
+        res.status(404).send('Page not found');
     }
 });
 
