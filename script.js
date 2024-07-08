@@ -19,6 +19,12 @@ function initFormBuilder() {
 
     // Initialize with a default page
     addPage();
+
+    // Load forms list
+    loadForms();
+
+    // Set up navigation
+    setupNavigation();
 }
 
 // Set up all event listeners
@@ -27,6 +33,90 @@ function setupEventListeners() {
     document.getElementById('add-page-btn').addEventListener('click', addPage);
     document.getElementById('generate-embed-code').addEventListener('click', generateEmbedCode);
     document.getElementById('settings-btn').addEventListener('click', openSettings);
+    document.getElementById('form-select').addEventListener('change', loadSubmissions);
+}
+
+// Set up navigation
+function setupNavigation() {
+    const navItems = document.querySelectorAll('#nav-menu a');
+    const contentSections = document.querySelectorAll('.content-section');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            navItems.forEach(navItem => navItem.classList.remove('active'));
+            this.classList.add('active');
+
+            const targetId = this.id.replace('nav-', '') + '-content';
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetId) {
+                    section.classList.add('active');
+                }
+            });
+        });
+    });
+}
+
+// Load forms list
+function loadForms() {
+    // This function should fetch the list of forms from the server
+    // For now, we'll use dummy data
+    const forms = [
+        { id: 1, name: 'Contact Form' },
+        { id: 2, name: 'Survey Form' },
+        { id: 3, name: 'Registration Form' }
+    ];
+
+    const formList = document.getElementById('form-list');
+    const formSelect = document.getElementById('form-select');
+
+    formList.innerHTML = '';
+    formSelect.innerHTML = '<option value="">Select a form</option>';
+
+    forms.forEach(form => {
+        const li = document.createElement('li');
+        li.textContent = form.name;
+        formList.appendChild(li);
+
+        const option = document.createElement('option');
+        option.value = form.id;
+        option.textContent = form.name;
+        formSelect.appendChild(option);
+    });
+}
+
+// Load submissions for a selected form
+function loadSubmissions() {
+    const formId = document.getElementById('form-select').value;
+    if (!formId) return;
+
+    // This function should fetch the submissions for the selected form from the server
+    // For now, we'll use dummy data
+    const submissions = [
+        { id: 1, date: '2023-05-01', form: 'Contact Form' },
+        { id: 2, date: '2023-05-02', form: 'Contact Form' },
+        { id: 3, date: '2023-05-03', form: 'Contact Form' }
+    ];
+
+    const submissionsTable = document.querySelector('#submissions-table tbody');
+    submissionsTable.innerHTML = '';
+
+    submissions.forEach(submission => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${submission.date}</td>
+            <td>${submission.form}</td>
+            <td><button onclick="viewSubmission(${submission.id})">View</button></td>
+        `;
+        submissionsTable.appendChild(tr);
+    });
+}
+
+// View a specific submission
+function viewSubmission(submissionId) {
+    // This function should fetch and display the details of a specific submission
+    alert(`Viewing submission ${submissionId}`);
 }
 
 // Add a new page to the form

@@ -11,8 +11,38 @@
 <body>
     <nav id="navbar">
         <h1>Custom Form Builder</h1>
+        <ul id="nav-menu">
+            <li><a href="#" id="nav-builder" class="active">Builder</a></li>
+            <li><a href="#" id="nav-forms">Forms</a></li>
+            <li><a href="#" id="nav-submissions">Submissions</a></li>
+        </ul>
         <button id="settings-btn">Settings</button>
     </nav>
+    <div id="content">
+        <div id="builder-content" class="content-section active">
+            <!-- Existing builder content goes here -->
+        </div>
+        <div id="forms-content" class="content-section">
+            <h2>Your Forms</h2>
+            <ul id="form-list"></ul>
+        </div>
+        <div id="submissions-content" class="content-section">
+            <h2>Form Submissions</h2>
+            <select id="form-select">
+                <option value="">Select a form</option>
+            </select>
+            <table id="submissions-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Form</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
     <div id="form-builder">
         <div id="builder-container">
             <div id="hierarchy-tree">

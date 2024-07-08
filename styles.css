@@ -49,6 +49,31 @@ body {
     font-size: 1.5rem;
 }
 
+#nav-menu {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#nav-menu li {
+    margin: 0 1rem;
+}
+
+#nav-menu a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+#nav-menu a:hover, #nav-menu a.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+
 #settings-btn {
     background-color: var(--accent-color);
     color: white;
@@ -66,6 +91,50 @@ body {
 #settings-btn:hover {
     background-color: #2563eb;
     transform: translateY(-1px);
+}
+
+.content-section {
+    display: none;
+}
+
+.content-section.active {
+    display: block;
+}
+
+#form-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#form-list li {
+    background-color: #f8fafc;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#submissions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+#submissions-table th, #submissions-table td {
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+#submissions-table th {
+    background-color: #f1f5f9;
+    font-weight: 600;
+}
+
+#form-select {
+    margin-bottom: 1rem;
 }
 
 #form-builder {
