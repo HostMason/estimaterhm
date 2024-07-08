@@ -1,7 +1,8 @@
 // Global variables
 let formState = {
     selectedField: null,
-    selectedPage: null
+    selectedPage: null,
+    fields: []
 };
 
 // Main initialization function
@@ -15,6 +16,9 @@ function initFormBuilder() {
             handleImageUpload(event);
         }
     });
+
+    // Initialize with a default page
+    addPage();
 }
 
 // Set up all event listeners
@@ -22,6 +26,7 @@ function setupEventListeners() {
     document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
     document.getElementById('add-page-btn').addEventListener('click', addPage);
     document.getElementById('generate-embed-code').addEventListener('click', generateEmbedCode);
+    document.getElementById('settings-btn').addEventListener('click', openSettings);
 }
 
 // Add a new page to the form
@@ -29,12 +34,19 @@ function addPage() {
     const page = createFieldObject('page');
     const listItem = createFieldListItem(page);
     document.getElementById('field-list').appendChild(listItem);
+    formState.fields.push(page);
     renderForm();
     initSortable();
 }
 
 // Initialize the form builder when the DOM is loaded
 document.addEventListener('DOMContentLoaded', initFormBuilder);
+
+// Open settings modal
+function openSettings() {
+    // Implement settings modal functionality
+    console.log('Settings opened');
+}
 
 function renderForm() {
     const formPreview = document.getElementById('custom-form');
