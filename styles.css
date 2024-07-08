@@ -313,6 +313,7 @@ body {
     text-align: center;
     padding: 15px;
     background-color: #f8f9fa;
+    border: 1px solid #e2e8f0;
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: all 0.3s ease;
@@ -326,13 +327,23 @@ body {
 }
 
 .field-option i {
-    font-size: 28px;
+    font-size: 24px;
     margin-bottom: 8px;
+    color: var(--accent-color);
+}
+
+.field-option:hover i {
+    color: white;
 }
 
 .field-option span {
     font-size: 14px;
     font-weight: 500;
+    color: var(--text-color);
+}
+
+.field-option:hover span {
+    color: white;
 }
 
 .hidden {
@@ -424,7 +435,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .modal {
-    display: none;
+    display: flex;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -433,24 +444,44 @@ input:focus, textarea:focus, select:focus {
     height: 100%;
     background-color: rgba(0,0,0,0.5);
     backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-content {
     background-color: #ffffff;
-    margin: 10% auto;
     padding: 30px;
     border-radius: var(--border-radius);
     width: 90%;
-    max-width: 600px;
+    max-width: 400px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: var(--accent-color);
 }
 
 .setting {
     margin-bottom: 20px;
 }
 
+.setting label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.setting input[type="color"],
+.setting select {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ced4da;
+    border-radius: var(--border-radius);
+}
+
 #save-settings, #close-settings {
     margin-top: 25px;
+    margin-right: 10px;
 }
 
 .button-container, .multi-button-container {

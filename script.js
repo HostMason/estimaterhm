@@ -152,8 +152,52 @@ document.addEventListener('DOMContentLoaded', initFormBuilder);
 
 // Open settings modal
 function openSettings() {
-    // Implement settings modal functionality
-    console.log('Settings opened');
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Form Builder Settings</h2>
+            <div class="setting">
+                <label for="background-color">Background Color:</label>
+                <input type="color" id="background-color" value="${currentTheme.backgroundColor}">
+            </div>
+            <div class="setting">
+                <label for="text-color">Text Color:</label>
+                <input type="color" id="text-color" value="${currentTheme.textColor}">
+            </div>
+            <div class="setting">
+                <label for="accent-color">Accent Color:</label>
+                <input type="color" id="accent-color" value="${currentTheme.accentColor}">
+            </div>
+            <div class="setting">
+                <label for="font-family">Font Family:</label>
+                <select id="font-family">
+                    <option value="Inter, Arial, sans-serif" ${currentTheme.fontFamily === 'Inter, Arial, sans-serif' ? 'selected' : ''}>Inter</option>
+                    <option value="Arial, sans-serif" ${currentTheme.fontFamily === 'Arial, sans-serif' ? 'selected' : ''}>Arial</option>
+                    <option value="Helvetica, sans-serif" ${currentTheme.fontFamily === 'Helvetica, sans-serif' ? 'selected' : ''}>Helvetica</option>
+                    <option value="Times New Roman, serif" ${currentTheme.fontFamily === 'Times New Roman, serif' ? 'selected' : ''}>Times New Roman</option>
+                </select>
+            </div>
+            <button id="save-settings">Save Settings</button>
+            <button id="close-settings">Close</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('save-settings').addEventListener('click', function() {
+        const newTheme = {
+            backgroundColor: document.getElementById('background-color').value,
+            textColor: document.getElementById('text-color').value,
+            accentColor: document.getElementById('accent-color').value,
+            fontFamily: document.getElementById('font-family').value
+        };
+        applyTheme(newTheme);
+        modal.remove();
+    });
+
+    document.getElementById('close-settings').addEventListener('click', function() {
+        modal.remove();
+    });
 }
 
 function renderForm() {
