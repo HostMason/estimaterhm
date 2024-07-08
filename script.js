@@ -6,6 +6,8 @@ let formState = {
     forms: []
 };
 
+let isLoggedIn = false;
+
 // Main initialization function
 function initFormBuilder() {
     setupEventListeners();
@@ -29,6 +31,140 @@ function initFormBuilder() {
 
     // Load saved state if available
     loadSavedState();
+
+    // Set up authentication
+    setupAuthentication();
+}
+
+// Set up authentication event listeners
+function setupAuthentication() {
+    document.getElementById('login-btn').addEventListener('click', showLoginModal);
+    document.getElementById('register-btn').addEventListener('click', showRegisterModal);
+    document.getElementById('logout-btn').addEventListener('click', logout);
+}
+
+// Show login modal
+function showLoginModal() {
+    const modal = createModal('Login', `
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <button id="login-submit">Login</button>
+    `);
+    document.body.appendChild(modal);
+    document.getElementById('login-submit').addEventListener('click', login);
+}
+
+// Show register modal
+function showRegisterModal() {
+    const modal = createModal('Register', `
+        <input type="text" id="register-username" placeholder="Username">
+        <input type="password" id="register-password" placeholder="Password">
+        <button id="register-submit">Register</button>
+    `);
+    document.body.appendChild(modal);
+    document.getElementById('register-submit').addEventListener('click', register);
+}
+
+// Create modal
+function createModal(title, content) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>${title}</h2>
+            ${content}
+            <button class="close-modal">Close</button>
+        </div>
+    `;
+    modal.querySelector('.close-modal').addEventListener('click', () => modal.remove());
+    return modal;
+}
+
+// Login function
+function login() {
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+    
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Logged in successfully') {
+            isLoggedIn = true;
+            updateAuthUI();
+            document.querySelector('.modal').remove();
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+// Register function
+function register() {
+    const username = document.getElementById('register-username').value;
+    const password = document.getElementById('register-password').value;
+    
+    fetch('/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        if (data.message === 'User created successfully') {
+            document.querySelector('.modal').remove();
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+// Logout function
+function logout() {
+    fetch('/logout', {
+        method: 'POST',
+    })
+    .then(response => response.json())
+    .then(data => {
+        isLoggedIn = false;
+        updateAuthUI();
+        alert(data.message);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+// Update UI based on authentication status
+function updateAuthUI() {
+    const loginBtn = document.getElementById('login-btn');
+    const registerBtn = document.getElementById('register-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const formBuilder = document.getElementById('form-builder');
+
+    if (isLoggedIn) {
+        loginBtn.style.display = 'none';
+        registerBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
+        formBuilder.style.display = 'block';
+    } else {
+        loginBtn.style.display = 'inline-block';
+        registerBtn.style.display = 'inline-block';
+        logoutBtn.style.display = 'none';
+        formBuilder.style.display = 'none';
+    }
 }
 
 // Load saved state from localStorage
