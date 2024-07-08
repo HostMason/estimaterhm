@@ -1,6 +1,6 @@
 :root {
     --background-color: #f8fafc;
-    --text-color: #1e293b;
+    --text-color: #000000;
     --accent-color: #3b82f6;
     --secondary-color: #64748b;
     --success-color: #22c55e;
@@ -13,10 +13,10 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --background-color: #1a202c;
-        --text-color: #e2e8f0;
+        --background-color: #ffffff;
+        --text-color: #000000;
         --accent-color: #4299e1;
-        --secondary-color: #a0aec0;
+        --secondary-color: #64748b;
     }
 }
 
@@ -54,7 +54,7 @@ body {
 #navbar h1 {
     margin: 0;
     font-weight: 600;
-    color: var(--accent-color);
+    color: var(--text-color);
     font-size: 1.5rem;
 }
 
@@ -397,7 +397,7 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    color: var(--secondary-color);
+    color: var(--text-color);
     font-size: 0.875rem;
 }
 
@@ -408,7 +408,8 @@ input, textarea, select {
     border-radius: var(--border-radius);
     transition: var(--transition);
     font-size: 1rem;
-    background-color: #f8fafc;
+    background-color: #ffffff;
+    color: var(--text-color);
 }
 
 input:focus, textarea:focus, select:focus {
