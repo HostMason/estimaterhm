@@ -33,8 +33,9 @@ As of the latest update, we have made significant progress on the core functiona
 
 - Node.js (v14 or later)
 - npm (v6 or later)
+- Git
 
-### Installation
+### Setting Up the Development Environment
 
 1. Clone the repository:
    ```
@@ -57,26 +58,51 @@ As of the latest update, we have made significant progress on the core functiona
    
    This file sets the port for the server to run on and the environment mode.
 
-   Create a `config.js` file in the root directory with the following content:
-   ```javascript
-   module.exports = {
-     development: {
-       // Development-specific configurations
-     },
-     production: {
-       // Production-specific configurations
-     }
-   };
+4. Start the development server:
    ```
-   
-   This file allows you to set environment-specific configurations.
+   npm run dev
+   ```
 
-4. Start the application:
+   This command starts the server with nodemon, which automatically restarts the server when you make changes to the code.
+
+5. Open your browser and navigate to `http://localhost:3000` to see the application running.
+
+### Development Workflow
+
+1. Make changes to the code in your preferred text editor or IDE.
+2. The server will automatically restart when you save changes to any server-side files.
+3. For client-side changes, refresh your browser to see the updates.
+4. Use the browser's developer tools to debug and inspect your changes.
+
+### Testing
+
+Currently, we don't have automated tests set up. It's recommended to manually test your changes thoroughly before committing.
+
+### Building for Production
+
+When you're ready to build for production:
+
+1. Update the `NODE_ENV` in your `.env` file:
    ```
+   NODE_ENV=production
+   ```
+
+2. Build and start the production server:
+   ```
+   npm run build
    npm start
    ```
 
-The application should now be running on `http://localhost:3000`.
+### Troubleshooting
+
+If you encounter any issues:
+
+1. Make sure all dependencies are installed correctly (`npm install`).
+2. Check that your Node.js version is 14 or later (`node --version`).
+3. Ensure the `.env` file is set up correctly.
+4. Clear your browser cache or try in an incognito/private window.
+
+If problems persist, please open an issue on the GitHub repository with a detailed description of the problem and steps to reproduce it.
 
 ## Usage
 
