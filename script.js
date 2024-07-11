@@ -8,6 +8,41 @@ let formState = {
 
 let isLoggedIn = false;
 
+// Undo/Redo functionality
+let undoStack = [];
+let redoStack = [];
+
+function saveState() {
+    undoStack.push(JSON.stringify(formState));
+    redoStack = [];
+    updateUndoRedoButtons();
+}
+
+function undo() {
+    if (undoStack.length > 1) {
+        redoStack.push(undoStack.pop());
+        formState = JSON.parse(undoStack[undoStack.length - 1]);
+        renderForm();
+        updateUndoRedoButtons();
+    }
+}
+
+function redo() {
+    if (redoStack.length > 0) {
+        undoStack.push(redoStack.pop());
+        formState = JSON.parse(undoStack[undoStack.length - 1]);
+        renderForm();
+        updateUndoRedoButtons();
+    }
+}
+
+function updateUndoRedoButtons() {
+    const undoButton = document.getElementById('undo-btn');
+    const redoButton = document.getElementById('redo-btn');
+    undoButton.disabled = undoStack.length <= 1;
+    redoButton.disabled = redoStack.length === 0;
+}
+
 // Main initialization function
 function initFormBuilder() {
     setupEventListeners();
@@ -188,6 +223,42 @@ function setupEventListeners() {
     document.getElementById('generate-embed-code').addEventListener('click', generateEmbedCode);
     document.getElementById('settings-btn').addEventListener('click', openSettings);
     document.getElementById('form-select').addEventListener('change', loadSubmissions);
+    document.getElementById('undo-btn').addEventListener('click', undo);
+    document.getElementById('redo-btn').addEventListener('click', redo);
+
+    // Keyboard accessibility
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+}
+
+function handleKeyboardShortcuts(event) {
+    // Ctrl/Cmd + Z for Undo
+    if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
+        event.preventDefault();
+        undo();
+    }
+    // Ctrl/Cmd + Y for Redo
+    if ((event.ctrlKey || event.metaKey) && event.key === 'y') {
+        event.preventDefault();
+        redo();
+    }
+    // Ctrl/Cmd + S for Save
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault();
+        saveForm();
+    }
+}
+
+function makeElementsFocusable() {
+    const focusableElements = document.querySelectorAll('#field-list .field-item, #field-options .field-option');
+    focusableElements.forEach(element => {
+        element.setAttribute('tabindex', '0');
+        element.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                element.click();
+            }
+        });
+    });
 }
 
 // Set up navigation
@@ -521,226 +592,221 @@ function configField(fieldId) {
     const fieldType = field.getAttribute('data-type');
     const fieldLabel = field.querySelector('.field-label').textContent;
 
-    let settingsHtml = `
-        <h3>Settings for ${fieldLabel}</h3>
-        <label>Field Label:
-            <input type="text" id="field-label" value="${fieldLabel}">
-        </label>
-    `;
+    const settingsPanel = document.getElementById('field-settings-panel');
+    settingsPanel.innerHTML = '';
+
+    const form = document.createElement('form');
+    form.id = 'field-settings-form';
+
+    const labelInput = createInput('text', 'field-label', 'Field Label', fieldLabel);
+    form.appendChild(labelInput);
 
     if (fieldType === 'page') {
-        settingsHtml += `
-            <label>Page Icon:
-                <input type="text" id="page-icon" value="${field.querySelector('.field-icon').textContent}">
-            </label>
-            <label>Page Header:
-                <input type="text" id="page-header" value="${fieldLabel}">
-            </label>
-        `;
+        const pageIcon = createInput('text', 'page-icon', 'Page Icon', field.querySelector('.field-icon').textContent);
+        const pageHeader = createInput('text', 'page-header', 'Page Header', fieldLabel);
+        form.appendChild(pageIcon);
+        form.appendChild(pageHeader);
     } else {
-        settingsHtml += `
-            <label>Placeholder:
-                <input type="text" id="field-placeholder" value="">
-            </label>
-            <label>Required:
-                <input type="checkbox" id="field-required">
-            </label>
-        `;
+        const placeholder = createInput('text', 'field-placeholder', 'Placeholder', '');
+        const required = createCheckbox('field-required', 'Required');
+        form.appendChild(placeholder);
+        form.appendChild(required);
 
         switch(fieldType) {
             case 'name':
-                settingsHtml += `
-                    <label>Show Middle Name:
-                        <input type="checkbox" id="show-middle-name">
-                    </label>
-                `;
+                form.appendChild(createCheckbox('show-middle-name', 'Show Middle Name'));
                 break;
             case 'email':
-                settingsHtml += `
-                    <label>Confirm Email:
-                        <input type="checkbox" id="confirm-email">
-                    </label>
-                `;
+                form.appendChild(createCheckbox('confirm-email', 'Confirm Email'));
                 break;
             case 'phone':
-                settingsHtml += `
-                    <label>Phone Format:
-                        <select id="phone-format">
-                            <option value="default">Default</option>
-                            <option value="us">US (xxx) xxx-xxxx</option>
-                            <option value="international">International</option>
-                        </select>
-                    </label>
-                `;
+                form.appendChild(createSelect('phone-format', 'Phone Format', [
+                    {value: 'default', text: 'Default'},
+                    {value: 'us', text: 'US (xxx) xxx-xxxx'},
+                    {value: 'international', text: 'International'}
+                ]));
                 break;
             case 'address':
-                settingsHtml += `
-                    <label>Show Address Line 2:
-                        <input type="checkbox" id="show-address-line-2">
-                    </label>
-                `;
+                form.appendChild(createCheckbox('show-address-line-2', 'Show Address Line 2'));
                 break;
             case 'website':
-                settingsHtml += `
-                    <label>URL Validation:
-                        <input type="checkbox" id="url-validation" checked>
-                    </label>
-                `;
+                form.appendChild(createCheckbox('url-validation', 'URL Validation'));
                 break;
             case 'text':
             case 'textarea':
-                settingsHtml += `
-                    <label>Min Length:
-                        <input type="number" id="min-length" min="0">
-                    </label>
-                    <label>Max Length:
-                        <input type="number" id="max-length" min="0">
-                    </label>
-                `;
+                form.appendChild(createInput('number', 'min-length', 'Min Length', '', {min: 0}));
+                form.appendChild(createInput('number', 'max-length', 'Max Length', '', {min: 0}));
                 break;
             case 'number':
-                settingsHtml += `
-                    <label>Min Value:
-                        <input type="number" id="min-value">
-                    </label>
-                    <label>Max Value:
-                        <input type="number" id="max-value">
-                    </label>
-                    <label>Step:
-                        <input type="number" id="step-value" step="any">
-                    </label>
-                `;
+                form.appendChild(createInput('number', 'min-value', 'Min Value'));
+                form.appendChild(createInput('number', 'max-value', 'Max Value'));
+                form.appendChild(createInput('number', 'step-value', 'Step', '', {step: 'any'}));
                 break;
             case 'radio':
             case 'checkbox':
             case 'select':
-                settingsHtml += `
-                    <h4>Options</h4>
-                    <div id="options-container">
-                        <div class="option-row">
-                            <input type="text" class="option-value" value="Option 1">
-                            <button onclick="removeOption(this)">Remove</button>
-                        </div>
-                    </div>
-                    <button onclick="addOption()">Add Option</button>
-                `;
+                const optionsContainer = document.createElement('div');
+                optionsContainer.id = 'options-container';
+                form.appendChild(optionsContainer);
+                form.appendChild(createButton('Add Option', () => addOption(optionsContainer)));
                 break;
             case 'date':
-                settingsHtml += `
-                    <label>Min Date:
-                        <input type="date" id="min-date">
-                    </label>
-                    <label>Max Date:
-                        <input type="date" id="max-date">
-                    </label>
-                `;
+                form.appendChild(createInput('date', 'min-date', 'Min Date'));
+                form.appendChild(createInput('date', 'max-date', 'Max Date'));
                 break;
             case 'time':
-                settingsHtml += `
-                    <label>Min Time:
-                        <input type="time" id="min-time">
-                    </label>
-                    <label>Max Time:
-                        <input type="time" id="max-time">
-                    </label>
-                `;
+                form.appendChild(createInput('time', 'min-time', 'Min Time'));
+                form.appendChild(createInput('time', 'max-time', 'Max Time'));
                 break;
             case 'html':
-                settingsHtml += `
-                    <label>HTML Content:
-                        <textarea id="html-content"></textarea>
-                    </label>
-                `;
+                form.appendChild(createTextarea('html-content', 'HTML Content'));
                 break;
             case 'hidden':
-                settingsHtml += `
-                    <label>Hidden Value:
-                        <input type="text" id="hidden-value">
-                    </label>
-                `;
+                form.appendChild(createInput('text', 'hidden-value', 'Hidden Value'));
                 break;
             case 'section':
-                settingsHtml += `
-                    <label>Section Title:
-                        <input type="text" id="section-title">
-                    </label>
-                `;
+                form.appendChild(createInput('text', 'section-title', 'Section Title'));
                 break;
             case 'fieldgroup':
-                settingsHtml += `
-                    <label>Group Title:
-                        <input type="text" id="group-title">
-                    </label>
-                `;
+                form.appendChild(createInput('text', 'group-title', 'Group Title'));
                 break;
             case 'slider':
-                settingsHtml += `
-                    <label>Min Value:
-                        <input type="number" id="slider-min">
-                    </label>
-                    <label>Max Value:
-                        <input type="number" id="slider-max">
-                    </label>
-                    <label>Step:
-                        <input type="number" id="slider-step" step="any">
-                    </label>
-                `;
+                form.appendChild(createInput('number', 'slider-min', 'Min Value'));
+                form.appendChild(createInput('number', 'slider-max', 'Max Value'));
+                form.appendChild(createInput('number', 'slider-step', 'Step', '', {step: 'any'}));
                 break;
             case 'button':
             case 'multi-button':
-                settingsHtml += `
-                    <label>Button Text:
-                        <input type="text" id="button-text" value="${fieldLabel}">
-                    </label>
-                    <label>Button Type:
-                        <select id="button-type">
-                            <option value="button">Button</option>
-                            <option value="submit">Submit</option>
-                            <option value="reset">Reset</option>
-                        </select>
-                    </label>
-                    <label>Upload Image:
-                        <input type="file" id="button-image" accept="image/*">
-                    </label>
-                    <label>Image Size:
-                        <select id="image-size">
-                            <option value="small">Small</option>
-                            <option value="medium">Medium</option>
-                            <option value="large">Large</option>
-                        </select>
-                    </label>
-                    <label>Button Size:
-                        <select id="button-size">
-                            <option value="small">Small</option>
-                            <option value="medium">Medium</option>
-                            <option value="large">Large</option>
-                        </select>
-                    </label>
-                `;
+                form.appendChild(createInput('text', 'button-text', 'Button Text', fieldLabel));
+                form.appendChild(createSelect('button-type', 'Button Type', [
+                    {value: 'button', text: 'Button'},
+                    {value: 'submit', text: 'Submit'},
+                    {value: 'reset', text: 'Reset'}
+                ]));
+                form.appendChild(createInput('file', 'button-image', 'Upload Image', '', {accept: 'image/*'}));
+                form.appendChild(createSelect('image-size', 'Image Size', [
+                    {value: 'small', text: 'Small'},
+                    {value: 'medium', text: 'Medium'},
+                    {value: 'large', text: 'Large'}
+                ]));
+                form.appendChild(createSelect('button-size', 'Button Size', [
+                    {value: 'small', text: 'Small'},
+                    {value: 'medium', text: 'Medium'},
+                    {value: 'large', text: 'Large'}
+                ]));
                 if (fieldType === 'multi-button') {
-                    settingsHtml += `
-                        <label>Allow Multiple Selections:
-                            <input type="checkbox" id="allow-multiple">
-                        </label>
-                        <label>Number of Buttons:
-                            <input type="number" id="button-count" min="1" value="1">
-                        </label>
-                        <div id="button-options"></div>
-                        <button onclick="addButtonOption()">Add Button</button>
-                    `;
+                    form.appendChild(createCheckbox('allow-multiple', 'Allow Multiple Selections'));
+                    form.appendChild(createInput('number', 'button-count', 'Number of Buttons', '1', {min: 1}));
+                    const buttonOptions = document.createElement('div');
+                    buttonOptions.id = 'button-options';
+                    form.appendChild(buttonOptions);
+                    form.appendChild(createButton('Add Button', () => addButtonOption(buttonOptions)));
                 }
                 break;
         }
     }
 
-    settingsHtml += `
-        <button onclick="saveFieldSettings('${fieldId}')">Save Settings</button>
-        <button onclick="closeFieldSettings()">Cancel</button>
-    `;
+    const saveButton = createButton('Save Settings', () => saveFieldSettings(fieldId));
+    const cancelButton = createButton('Cancel', closeFieldSettings);
+    form.appendChild(saveButton);
+    form.appendChild(cancelButton);
 
-    const settingsPanel = document.getElementById('field-settings-panel');
-    settingsPanel.innerHTML = settingsHtml;
+    settingsPanel.appendChild(form);
     settingsPanel.style.display = 'block';
+}
+
+function createInput(type, id, label, value = '', attributes = {}) {
+    const container = document.createElement('div');
+    container.className = 'form-group';
+    const labelElement = document.createElement('label');
+    labelElement.htmlFor = id;
+    labelElement.textContent = label;
+    const input = document.createElement('input');
+    input.type = type;
+    input.id = id;
+    input.value = value;
+    Object.keys(attributes).forEach(key => input.setAttribute(key, attributes[key]));
+    container.appendChild(labelElement);
+    container.appendChild(input);
+    return container;
+}
+
+function createCheckbox(id, label) {
+    const container = document.createElement('div');
+    container.className = 'form-group';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = id;
+    const labelElement = document.createElement('label');
+    labelElement.htmlFor = id;
+    labelElement.textContent = label;
+    container.appendChild(input);
+    container.appendChild(labelElement);
+    return container;
+}
+
+function createSelect(id, label, options) {
+    const container = document.createElement('div');
+    container.className = 'form-group';
+    const labelElement = document.createElement('label');
+    labelElement.htmlFor = id;
+    labelElement.textContent = label;
+    const select = document.createElement('select');
+    select.id = id;
+    options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.value;
+        optionElement.textContent = option.text;
+        select.appendChild(optionElement);
+    });
+    container.appendChild(labelElement);
+    container.appendChild(select);
+    return container;
+}
+
+function createTextarea(id, label) {
+    const container = document.createElement('div');
+    container.className = 'form-group';
+    const labelElement = document.createElement('label');
+    labelElement.htmlFor = id;
+    labelElement.textContent = label;
+    const textarea = document.createElement('textarea');
+    textarea.id = id;
+    container.appendChild(labelElement);
+    container.appendChild(textarea);
+    return container;
+}
+
+function createButton(text, onClick) {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.addEventListener('click', onClick);
+    return button;
+}
+
+function addOption(container) {
+    const optionRow = document.createElement('div');
+    optionRow.className = 'option-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'option-value';
+    input.value = `Option ${container.children.length + 1}`;
+    const removeButton = createButton('Remove', () => optionRow.remove());
+    optionRow.appendChild(input);
+    optionRow.appendChild(removeButton);
+    container.appendChild(optionRow);
+}
+
+function addButtonOption(container) {
+    const optionRow = document.createElement('div');
+    optionRow.className = 'button-option-row';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = `Button ${container.children.length + 1}`;
+    const removeButton = createButton('Remove', () => optionRow.remove());
+    optionRow.appendChild(input);
+    optionRow.appendChild(removeButton);
+    container.appendChild(optionRow);
 }
 
 function addOption() {
@@ -761,122 +827,101 @@ function removeOption(button) {
 function saveFieldSettings(fieldId) {
     const field = document.querySelector(`[data-id="${fieldId}"]`);
     const fieldType = field.getAttribute('data-type');
-    const newLabel = document.getElementById('field-label').value;
+    const form = document.getElementById('field-settings-form');
+    const formData = new FormData(form);
 
-    field.querySelector('.field-label').textContent = newLabel;
+    // Update field label in the hierarchy tree
+    field.querySelector('.field-label').textContent = formData.get('field-label');
 
-    if (fieldType === 'page') {
-        const newIcon = document.getElementById('page-icon').value;
-        const newHeader = document.getElementById('page-header').value;
-        field.querySelector('.field-icon').textContent = newIcon;
-        field.querySelector('.field-label').textContent = newHeader;
-    } else {
-        const placeholder = document.getElementById('field-placeholder').value;
-        const required = document.getElementById('field-required').checked;
-
-        // Update the form preview
-        const previewField = document.querySelector(`#field-block-${fieldId}`);
-        if (previewField) {
-            previewField.querySelector('label').textContent = newLabel + (required ? ' *' : '') + ':';
-            const input = previewField.querySelector('input, textarea, select');
-            if (input) {
-                input.placeholder = placeholder;
-                input.required = required;
-            }
-
-            switch(fieldType) {
-                case 'name':
-                    const showMiddleName = document.getElementById('show-middle-name').checked;
-                    updateNameField(previewField, showMiddleName);
-                    break;
-                case 'email':
-                    const confirmEmail = document.getElementById('confirm-email').checked;
-                    updateEmailField(previewField, confirmEmail);
-                    break;
-                case 'phone':
-                    const phoneFormat = document.getElementById('phone-format').value;
-                    updatePhoneField(previewField, phoneFormat);
-                    break;
-                case 'address':
-                    const showAddressLine2 = document.getElementById('show-address-line-2').checked;
-                    updateAddressField(previewField, showAddressLine2);
-                    break;
-                case 'website':
-                    const urlValidation = document.getElementById('url-validation').checked;
-                    updateWebsiteField(previewField, urlValidation);
-                    break;
-                case 'text':
-                case 'textarea':
-                    const minLength = document.getElementById('min-length').value;
-                    const maxLength = document.getElementById('max-length').value;
-                    updateTextField(previewField, minLength, maxLength);
-                    break;
-                case 'number':
-                    const minValue = document.getElementById('min-value').value;
-                    const maxValue = document.getElementById('max-value').value;
-                    const step = document.getElementById('step-value').value;
-                    updateNumberField(previewField, minValue, maxValue, step);
-                    break;
-                case 'radio':
-                case 'checkbox':
-                case 'select':
-                    const options = Array.from(document.querySelectorAll('.option-value')).map(opt => opt.value);
-                    updateFieldOptions(previewField, fieldType, options);
-                    break;
-                case 'date':
-                    const minDate = document.getElementById('min-date').value;
-                    const maxDate = document.getElementById('max-date').value;
-                    updateDateField(previewField, minDate, maxDate);
-                    break;
-                case 'time':
-                    const minTime = document.getElementById('min-time').value;
-                    const maxTime = document.getElementById('max-time').value;
-                    updateTimeField(previewField, minTime, maxTime);
-                    break;
-                case 'html':
-                    const htmlContent = document.getElementById('html-content').value;
-                    updateHtmlField(previewField, htmlContent);
-                    break;
-                case 'hidden':
-                    const hiddenValue = document.getElementById('hidden-value').value;
-                    updateHiddenField(previewField, hiddenValue);
-                    break;
-                case 'section':
-                    const sectionTitle = document.getElementById('section-title').value;
-                    updateSectionField(previewField, sectionTitle);
-                    break;
-                case 'fieldgroup':
-                    const groupTitle = document.getElementById('group-title').value;
-                    updateFieldGroupField(previewField, groupTitle);
-                    break;
-                case 'slider':
-                    const sliderMin = document.getElementById('slider-min').value;
-                    const sliderMax = document.getElementById('slider-max').value;
-                    const sliderStep = document.getElementById('slider-step').value;
-                    updateSliderField(previewField, sliderMin, sliderMax, sliderStep);
-                    break;
-                case 'button':
-                case 'multi-button':
-                    const buttonText = document.getElementById('button-text').value;
-                    const buttonType = document.getElementById('button-type').value;
-                    const buttonImage = document.getElementById('button-image').files[0];
-                    const imageSize = document.getElementById('image-size').value;
-                    const buttonSize = document.getElementById('button-size').value;
-                    if (fieldType === 'button') {
-                        updateButtonField(previewField, buttonText, buttonType, buttonImage, imageSize, buttonSize);
-                    } else {
-                        const allowMultiple = document.getElementById('allow-multiple').checked;
-                        const buttonCount = document.getElementById('button-count').value;
-                        const buttonOptions = Array.from(document.querySelectorAll('#button-options input')).map(input => input.value);
-                        updateMultiButtonField(previewField, buttonOptions, allowMultiple, imageSize, buttonSize);
-                    }
-                    break;
-            }
-        }
+    // Update form state
+    const fieldIndex = formState.fields.findIndex(f => f.id === fieldId);
+    if (fieldIndex !== -1) {
+        formState.fields[fieldIndex] = {
+            ...formState.fields[fieldIndex],
+            label: formData.get('field-label'),
+            settings: Object.fromEntries(formData)
+        };
     }
 
+    // Real-time preview update
+    updateFieldPreview(fieldId, fieldType, Object.fromEntries(formData));
+
     closeFieldSettings();
-    renderForm();
+}
+
+function updateFieldPreview(fieldId, fieldType, settings) {
+    const previewField = document.querySelector(`#field-block-${fieldId}`);
+    if (!previewField) return;
+
+    const label = previewField.querySelector('label');
+    label.textContent = settings['field-label'] + (settings['field-required'] ? ' *' : '') + ':';
+
+    const input = previewField.querySelector('input, textarea, select');
+    if (input) {
+        input.placeholder = settings['field-placeholder'] || '';
+        input.required = settings['field-required'] === 'on';
+    }
+
+    switch(fieldType) {
+        case 'name':
+            updateNameField(previewField, settings['show-middle-name'] === 'on');
+            break;
+        case 'email':
+            updateEmailField(previewField, settings['confirm-email'] === 'on');
+            break;
+        case 'phone':
+            updatePhoneField(previewField, settings['phone-format']);
+            break;
+        case 'address':
+            updateAddressField(previewField, settings['show-address-line-2'] === 'on');
+            break;
+        case 'website':
+            updateWebsiteField(previewField, settings['url-validation'] === 'on');
+            break;
+        case 'text':
+        case 'textarea':
+            updateTextField(previewField, settings['min-length'], settings['max-length']);
+            break;
+        case 'number':
+            updateNumberField(previewField, settings['min-value'], settings['max-value'], settings['step-value']);
+            break;
+        case 'radio':
+        case 'checkbox':
+        case 'select':
+            const options = Array.from(document.querySelectorAll('#options-container .option-value')).map(opt => opt.value);
+            updateFieldOptions(previewField, fieldType, options);
+            break;
+        case 'date':
+            updateDateField(previewField, settings['min-date'], settings['max-date']);
+            break;
+        case 'time':
+            updateTimeField(previewField, settings['min-time'], settings['max-time']);
+            break;
+        case 'html':
+            updateHtmlField(previewField, settings['html-content']);
+            break;
+        case 'hidden':
+            updateHiddenField(previewField, settings['hidden-value']);
+            break;
+        case 'section':
+            updateSectionField(previewField, settings['section-title']);
+            break;
+        case 'fieldgroup':
+            updateFieldGroupField(previewField, settings['group-title']);
+            break;
+        case 'slider':
+            updateSliderField(previewField, settings['slider-min'], settings['slider-max'], settings['slider-step']);
+            break;
+        case 'button':
+        case 'multi-button':
+            if (fieldType === 'button') {
+                updateButtonField(previewField, settings['button-text'], settings['button-type'], settings['button-image'], settings['image-size'], settings['button-size']);
+            } else {
+                const buttonOptions = Array.from(document.querySelectorAll('#button-options input')).map(input => input.value);
+                updateMultiButtonField(previewField, buttonOptions, settings['allow-multiple'] === 'on', settings['image-size'], settings['button-size']);
+            }
+            break;
+    }
 }
 
 function updateFieldOptions(previewField, fieldType, options) {
@@ -1239,75 +1284,54 @@ function generateEmbedCode() {
 function initSortable() {
     const fieldList = document.getElementById('field-list');
     
-    let draggedItem = null;
-
-    fieldList.addEventListener('dragstart', function(e) {
-        draggedItem = e.target;
-        setTimeout(() => {
-            e.target.classList.add('dragging');
-        }, 0);
-    });
-
-    fieldList.addEventListener('dragend', function(e) {
-        e.target.classList.remove('dragging');
-        renderForm();
-    });
-
-    fieldList.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(e.clientY);
-        const draggable = document.querySelector('.dragging');
-        
-        if (draggable.getAttribute('data-type') === 'page') {
-            if (afterElement == null) {
-                fieldList.appendChild(draggable);
-            } else {
-                fieldList.insertBefore(draggable, afterElement);
-            }
-        } else {
-            const closestPage = getClosestPage(e.clientY);
-            if (closestPage) {
-                const pageFields = closestPage.querySelector('.page-fields');
-                const afterElementInPage = getDragAfterElement(e.clientY, pageFields);
-                if (afterElementInPage == null) {
-                    pageFields.appendChild(draggable);
-                } else {
-                    pageFields.insertBefore(draggable, afterElementInPage);
-                }
-            }
+    new Sortable(fieldList, {
+        group: 'fields',
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        handle: '.field-header',
+        onEnd: function() {
+            updateFormState();
+            renderForm();
         }
     });
 
-    function getDragAfterElement(y, container = fieldList) {
-        const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
-
-        return draggableElements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = y - box.top - box.height / 2;
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-            } else {
-                return closest;
+    const pageFields = document.querySelectorAll('.page-fields');
+    pageFields.forEach(pageField => {
+        new Sortable(pageField, {
+            group: 'fields',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            handle: '.field-header',
+            onEnd: function() {
+                updateFormState();
+                renderForm();
             }
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
-    }
+        });
+    });
+}
 
-    function getClosestPage(y) {
-        const pages = [...fieldList.querySelectorAll('li[data-type="page"]')];
-        return pages.reduce((closest, page) => {
-            const box = page.getBoundingClientRect();
-            const offset = y - box.top - box.height;
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: page };
-            } else {
-                return closest;
-            }
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
-    }
-
-    const listItems = document.querySelectorAll('#field-list li');
-    listItems.forEach(item => {
-        item.setAttribute('draggable', 'true');
+function updateFormState() {
+    const fieldList = document.getElementById('field-list');
+    formState.fields = [];
+    fieldList.querySelectorAll('li[data-type="page"]').forEach(page => {
+        const pageFields = [];
+        page.querySelectorAll('.page-fields > li').forEach(field => {
+            pageFields.push({
+                id: field.getAttribute('data-id'),
+                type: field.getAttribute('data-type'),
+                label: field.querySelector('.field-label').textContent
+            });
+        });
+        formState.fields.push({
+            id: page.getAttribute('data-id'),
+            type: 'page',
+            label: page.querySelector('.field-label').textContent,
+            fields: pageFields
+        });
     });
 }
 function updateNameField(previewField, showMiddleName) {
