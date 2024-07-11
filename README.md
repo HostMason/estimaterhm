@@ -106,15 +106,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Roadmap
 
-1. Implement user roles and permissions system
-2. Add form submission notifications (email, SMS)
-3. Create a dashboard with form performance metrics
-4. Implement form field dependencies and calculations
-5. Add support for custom CSS in form styling
-6. Develop an API for programmatic form creation and management
-7. Implement form duplication and import/export functionality
-8. Add support for digital signatures in forms
-9. Implement A/B testing for form layouts and fields
+- [ ] Implement user roles and permissions system
+- [ ] Add form submission notifications (email, SMS)
+- [ ] Create a dashboard with form performance metrics
+- [ ] Implement form field dependencies and calculations
+- [ ] Add support for custom CSS in form styling
+- [ ] Develop an API for programmatic form creation and management
+- [ ] Implement form duplication and import/export functionality
+- [ ] Add support for digital signatures in forms
+- [ ] Implement A/B testing for form layouts and fields
+
+Note: This roadmap is for internal use only as this is a private project.
 
 ## Support
 
