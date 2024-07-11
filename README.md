@@ -99,6 +99,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Implement advanced form validation rules
 - Add support for recurring forms and scheduling
 
+## TODO List
+
+- [ ] Refactor the form builder interface for better usability
+- [ ] Implement user roles and permissions system
+- [ ] Add form submission notifications (email, SMS)
+- [ ] Create a dashboard with form performance metrics
+- [ ] Implement form field dependencies and calculations
+- [ ] Add support for custom CSS in form styling
+- [ ] Develop an API for programmatic form creation and management
+- [ ] Implement form duplication and import/export functionality
+- [ ] Add support for digital signatures in forms
+- [ ] Implement A/B testing for form layouts and fields
+
 ## Support
 
 If you encounter any issues or have questions, please file an issue on the GitHub repository or contact our support team at support@hostmason.com.
