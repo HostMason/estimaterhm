@@ -1,23 +1,23 @@
 :root {
-    --background-color: #f8fafc;
-    --text-color: #000000;
-    --accent-color: #3b82f6;
-    --secondary-color: #64748b;
-    --success-color: #22c55e;
-    --danger-color: #ef4444;
-    --font-family: 'Inter', Arial, sans-serif;
-    --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --border-radius: 0.5rem;
-    --transition: all 0.3s ease;
-    --sidebar-width: 250px;
+    --background-color: #f7f7f7;
+    --text-color: #333333;
+    --accent-color: #4a90e2;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --sidebar-width: 280px;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --background-color: #1a202c;
-        --text-color: #ffffff;
-        --accent-color: #4299e1;
-        --secondary-color: #a0aec0;
+        --background-color: #1f2937;
+        --text-color: #f3f4f6;
+        --accent-color: #60a5fa;
+        --secondary-color: #9ca3af;
     }
 }
 
@@ -42,18 +42,20 @@ body {
     width: var(--sidebar-width);
     background-color: #ffffff;
     color: var(--text-color);
-    padding: 1rem;
+    padding: 2rem;
     box-shadow: var(--box-shadow);
     position: fixed;
     height: 100vh;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 #sidebar h1 {
     margin: 0 0 2rem 0;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--accent-color);
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     text-align: center;
 }
 
@@ -64,57 +66,63 @@ body {
 }
 
 #nav-menu li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 #nav-menu a {
     color: var(--text-color);
     text-decoration: none;
     font-weight: 500;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     border-radius: var(--border-radius);
     transition: var(--transition);
     display: block;
+    font-size: 1rem;
 }
 
 #nav-menu a:hover, #nav-menu a.active {
     background-color: var(--accent-color);
     color: white;
+    transform: translateX(5px);
 }
 
 #auth-buttons {
-    margin-top: 2rem;
+    margin-top: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 1rem;
 }
 
 #login-btn, #register-btn, #logout-btn {
     background-color: var(--accent-color);
     color: white;
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     cursor: pointer;
     border-radius: var(--border-radius);
     transition: var(--transition);
-    font-weight: 500;
-    font-size: 0.875rem;
+    font-weight: 600;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    text-align: center;
 }
 
 #login-btn:hover, #register-btn:hover, #logout-btn:hover {
-    background-color: #2563eb;
-    transform: translateY(-1px);
+    background-color: #3a7bc8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 #main-content {
     flex-grow: 1;
     margin-left: var(--sidebar-width);
-    padding: 2rem;
+    padding: 3rem;
+    max-width: 1200px;
+    width: 100%;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     #sidebar {
         width: 100%;
         height: auto;
@@ -123,6 +131,7 @@ body {
 
     #main-content {
         margin-left: 0;
+        padding: 2rem;
     }
 
     body {
@@ -141,42 +150,63 @@ body {
     background-color: rgba(0,0,0,0.5);
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
     background-color: #ffffff;
-    padding: 2rem;
+    padding: 2.5rem;
     border-radius: var(--border-radius);
-    width: 300px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .modal-content h2 {
     margin-top: 0;
     color: var(--accent-color);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .modal-content input {
     width: 100%;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ced4da;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e2e8f0;
     border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.modal-content input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
 .modal-content button {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.75rem;
     background-color: var(--accent-color);
     color: white;
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: var(--transition);
+    font-weight: 600;
+    font-size: 1rem;
 }
 
 .modal-content button:hover {
-    background-color: #2563eb;
+    background-color: #3a7bc8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .close-modal {
@@ -185,7 +215,7 @@ body {
 }
 
 .close-modal:hover {
-    background-color: #4b5563 !important;
+    background-color: #5a6268 !important;
 }
 
 .content-section {

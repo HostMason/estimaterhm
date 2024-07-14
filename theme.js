@@ -1,11 +1,11 @@
 let currentTheme = {
-    backgroundColor: '#f8fafc',
-    textColor: '#000000',
-    accentColor: '#3b82f6',
-    secondaryColor: '#64748b',
-    successColor: '#22c55e',
-    dangerColor: '#ef4444',
-    fontFamily: 'Inter, Arial, sans-serif'
+    backgroundColor: '#f7f7f7',
+    textColor: '#333333',
+    accentColor: '#4a90e2',
+    secondaryColor: '#6c757d',
+    successColor: '#28a745',
+    dangerColor: '#dc3545',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif"
 };
 
 function applyTheme(theme) {
