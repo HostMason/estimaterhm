@@ -1,10 +1,10 @@
 let currentTheme = {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8fafc',
     textColor: '#000000',
-    accentColor: '#007bff',
-    secondaryColor: '#6c757d',
-    successColor: '#28a745',
-    dangerColor: '#dc3545',
+    accentColor: '#3b82f6',
+    secondaryColor: '#64748b',
+    successColor: '#22c55e',
+    dangerColor: '#ef4444',
     fontFamily: 'Inter, Arial, sans-serif'
 };
 
@@ -14,6 +14,9 @@ function applyTheme(theme) {
         document.documentElement.style.setProperty(`--${key}`, currentTheme[key]);
     });
     saveTheme();
+    document.body.style.backgroundColor = currentTheme.backgroundColor;
+    document.body.style.color = currentTheme.textColor;
+    document.body.style.fontFamily = currentTheme.fontFamily;
 }
 
 function loadThemeFromZip(file) {
