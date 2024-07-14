@@ -1,3 +1,5 @@
+import { initFormBuilder } from '../script.js';
+
 document.addEventListener('DOMContentLoaded', function() {
     // Set up navigation
     const navLinks = document.querySelectorAll('nav a');
@@ -61,8 +63,7 @@ function initializeDashboard() {
 
 function initializeFormBuilder() {
     console.log('Form Builder initialized');
-    // Add form builder initialization code here
-    setupFormBuilder();
+    initFormBuilder();
 }
 
 function initializeForms() {
@@ -78,10 +79,6 @@ function initializeSubmissions() {
 function initializeSettings() {
     console.log('Settings view initialized');
     setupSettings();
-}
-
-function setupFormBuilder() {
-    // Add form builder setup code here
 }
 
 function loadForms() {
