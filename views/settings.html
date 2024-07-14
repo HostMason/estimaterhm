@@ -1,2 +1,20 @@
 <h2>Settings</h2>
-<button id="settings-btn">Open Settings</button>
+<div id="settings-panel">
+    <h3>General Settings</h3>
+    <form id="general-settings-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email">
+        <button type="submit">Save General Settings</button>
+    </form>
+    <h3>Theme Settings</h3>
+    <form id="theme-settings-form">
+        <label for="theme-select">Select Theme:</label>
+        <select id="theme-select" name="theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+        </select>
+        <button type="submit">Apply Theme</button>
+    </form>
+</div>
