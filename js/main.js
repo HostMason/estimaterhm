@@ -1,6 +1,10 @@
-import { initFormBuilder } from '../script.js';
+import { initFormBuilder } from './script.js';
+import { loadSavedTheme } from './theme.js';
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Load the saved theme
+    loadSavedTheme();
+
     // Set up navigation
     const navLinks = document.querySelectorAll('nav a');
     navLinks.forEach(link => {
@@ -32,24 +36,44 @@ function loadContent(route) {
 
     switch(route) {
         case 'dashboard':
-            mainContent.innerHTML = '<h2>Dashboard</h2><p>Welcome to your dashboard!</p>';
-            initializeDashboard();
+            fetch('/views/dashboard.html')
+                .then(response => response.text())
+                .then(html => {
+                    mainContent.innerHTML = html;
+                    initializeDashboard();
+                });
             break;
         case 'form-builder':
-            mainContent.innerHTML = '<h2>Form Builder</h2><div id="form-builder"></div>';
-            initializeFormBuilder();
+            fetch('/views/form-builder.html')
+                .then(response => response.text())
+                .then(html => {
+                    mainContent.innerHTML = html;
+                    initializeFormBuilder();
+                });
             break;
         case 'forms':
-            mainContent.innerHTML = '<h2>Forms</h2><div id="forms-list"></div>';
-            initializeForms();
+            fetch('/views/forms.html')
+                .then(response => response.text())
+                .then(html => {
+                    mainContent.innerHTML = html;
+                    initializeForms();
+                });
             break;
         case 'submissions':
-            mainContent.innerHTML = '<h2>Submissions</h2><div id="submissions-list"></div>';
-            initializeSubmissions();
+            fetch('/views/submissions.html')
+                .then(response => response.text())
+                .then(html => {
+                    mainContent.innerHTML = html;
+                    initializeSubmissions();
+                });
             break;
         case 'settings':
-            mainContent.innerHTML = '<h2>Settings</h2><div id="settings-panel"></div>';
-            initializeSettings();
+            fetch('/views/settings.html')
+                .then(response => response.text())
+                .then(html => {
+                    mainContent.innerHTML = html;
+                    initializeSettings();
+                });
             break;
         default:
             mainContent.innerHTML = '<h2>404 Not Found</h2><p>The requested page does not exist.</p>';
@@ -83,14 +107,17 @@ function initializeSettings() {
 
 function loadForms() {
     // Add code to load and display forms
+    console.log('Loading forms...');
 }
 
 function loadSubmissions() {
     // Add code to load and display submissions
+    console.log('Loading submissions...');
 }
 
 function setupSettings() {
     // Add code to setup settings panel
+    console.log('Setting up settings panel...');
 }
 
 // Add other necessary functions here

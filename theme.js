@@ -1,4 +1,4 @@
-let currentTheme = {
+export let currentTheme = {
     backgroundColor: '#f7f7f7',
     textColor: '#333333',
     accentColor: '#4a90e2',
@@ -8,7 +8,7 @@ let currentTheme = {
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif"
 };
 
-function applyTheme(theme) {
+export function applyTheme(theme) {
     currentTheme = { ...currentTheme, ...theme };
     Object.keys(currentTheme).forEach(key => {
         document.documentElement.style.setProperty(`--${key}`, currentTheme[key]);
@@ -19,7 +19,7 @@ function applyTheme(theme) {
     document.body.style.fontFamily = currentTheme.fontFamily;
 }
 
-function loadThemeFromZip(file) {
+export function loadThemeFromZip(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
         JSZip.loadAsync(e.target.result).then(function(zip) {
@@ -32,15 +32,15 @@ function loadThemeFromZip(file) {
     reader.readAsArrayBuffer(file);
 }
 
-function saveTheme() {
+export function saveTheme() {
     localStorage.setItem('currentTheme', JSON.stringify(currentTheme));
 }
 
-function loadSavedTheme() {
+export function loadSavedTheme() {
     const savedTheme = localStorage.getItem('currentTheme');
     if (savedTheme) {
         applyTheme(JSON.parse(savedTheme));
+    } else {
+        applyTheme(currentTheme); // Apply default theme if no saved theme
     }
 }
-
-document.addEventListener('DOMContentLoaded', loadSavedTheme);
