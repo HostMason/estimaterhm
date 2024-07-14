@@ -11,21 +11,26 @@ As of the latest update, we have made significant progress on the core functiona
 - [x] Added real-time form preview updates
 - [x] Implemented undo/redo functionality
 - [x] Improved keyboard accessibility
+- [x] Added multi-page form support
+- [x] Implemented form embedding functionality
+- [x] Enhanced customization options for form fields
 - [ ] User roles and permissions system (in progress)
-- [ ] Form submission notifications (planned)
+- [ ] Form submission notifications (in progress)
 - [ ] Dashboard with form performance metrics (planned)
 
 ## Features
 
 - Intuitive drag-and-drop form builder interface
 - Wide variety of form field types (text, email, number, radio buttons, checkboxes, etc.)
-- Multi-page form support
+- Multi-page form support with easy navigation
+- Advanced field customization options (e.g., input validation, placeholder text)
 - Customizable themes and styling options
-- Form embedding functionality
-- Real-time form preview
-- Undo/Redo functionality
-- Keyboard accessibility
-- Responsive design for mobile and desktop
+- Form embedding functionality with generated embed code
+- Real-time form preview with mobile/desktop toggle
+- Undo/Redo functionality for easy editing
+- Keyboard accessibility for improved user experience
+- Responsive design for seamless mobile and desktop usage
+- Form state saving and loading functionality
 
 ## Getting Started
 
