@@ -61,14 +61,17 @@ function initFormBuilder() {
     // Load forms list
     loadForms();
 
-    // Set up navigation
-    setupNavigation();
-
     // Load saved state if available
     loadSavedState();
 
     // Set up authentication
     setupAuthentication();
+
+    // Update UI based on authentication status
+    updateAuthUI();
+
+    // Initialize undo/redo functionality
+    updateUndoRedoButtons();
 }
 
 // Set up authentication event listeners
@@ -225,6 +228,14 @@ function setupEventListeners() {
     document.getElementById('form-select').addEventListener('change', loadSubmissions);
     document.getElementById('undo-btn').addEventListener('click', undo);
     document.getElementById('redo-btn').addEventListener('click', redo);
+    document.getElementById('save-form-btn').addEventListener('click', saveForm);
+
+    // Pagination buttons
+    document.getElementById('prev-page').addEventListener('click', () => changePage(-1));
+    document.getElementById('next-page').addEventListener('click', () => changePage(1));
+
+    // Create new form button
+    document.getElementById('create-new-form').addEventListener('click', createNewForm);
 
     // Keyboard accessibility
     document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -1488,4 +1499,32 @@ function addButtonOption() {
         <button onclick="this.parentElement.remove()">Remove</button>
     `;
     optionsContainer.appendChild(newOption);
+}
+function saveForm() {
+    // Implement form saving logic here
+    console.log('Form saved');
+    saveState();
+}
+
+function changePage(direction) {
+    // Implement pagination logic here
+    console.log(`Changing page: ${direction}`);
+}
+
+function createNewForm() {
+    // Implement new form creation logic here
+    console.log('Creating new form');
+    // Reset the form state
+    formState = {
+        selectedField: null,
+        selectedPage: null,
+        fields: [],
+        forms: []
+    };
+    // Add a default page
+    addPage();
+    // Render the new form
+    renderForm();
+    // Save the new state
+    saveState();
 }
