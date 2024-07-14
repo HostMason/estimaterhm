@@ -39,12 +39,14 @@ function redo() {
 function updateUndoRedoButtons() {
     const undoButton = document.getElementById('undo-btn');
     const redoButton = document.getElementById('redo-btn');
-    undoButton.disabled = undoStack.length <= 1;
-    redoButton.disabled = redoStack.length === 0;
+    if (undoButton && redoButton) {
+        undoButton.disabled = undoStack.length <= 1;
+        redoButton.disabled = redoStack.length === 0;
+    }
 }
 
 // Main initialization function
-function initFormBuilder() {
+export function initFormBuilder() {
     setupEventListeners();
     initSortable();
     
@@ -77,8 +79,67 @@ function initFormBuilder() {
     renderForm();
 }
 
-// Export the initFormBuilder function
-export { initFormBuilder };
+// Setup event listeners
+function setupEventListeners() {
+    document.getElementById('add-field-btn').addEventListener('click', toggleFieldMenu);
+    document.getElementById('add-page-btn').addEventListener('click', addPage);
+    document.getElementById('generate-embed-code').addEventListener('click', generateEmbedCode);
+    document.getElementById('settings-btn').addEventListener('click', openSettings);
+    document.getElementById('undo-btn').addEventListener('click', undo);
+    document.getElementById('redo-btn').addEventListener('click', redo);
+    document.getElementById('save-form-btn').addEventListener('click', saveForm);
+}
+
+// Add other necessary functions here (e.g., toggleFieldMenu, addPage, generateEmbedCode, openSettings, saveForm)
+
+// Placeholder functions (implement these based on your requirements)
+function toggleFieldMenu() {
+    console.log('Toggle field menu');
+}
+
+function addPage() {
+    console.log('Add page');
+}
+
+function generateEmbedCode() {
+    console.log('Generate embed code');
+}
+
+function openSettings() {
+    console.log('Open settings');
+}
+
+function saveForm() {
+    console.log('Save form');
+}
+
+function loadForms() {
+    console.log('Load forms');
+}
+
+function loadSavedState() {
+    console.log('Load saved state');
+}
+
+function setupAuthentication() {
+    console.log('Setup authentication');
+}
+
+function updateAuthUI() {
+    console.log('Update auth UI');
+}
+
+function initSortable() {
+    console.log('Initialize sortable');
+}
+
+function renderForm() {
+    console.log('Render form');
+}
+
+function handleImageUpload(event) {
+    console.log('Handle image upload', event);
+}
 
 // Set up authentication event listeners
 function setupAuthentication() {

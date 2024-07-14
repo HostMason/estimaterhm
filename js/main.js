@@ -1,5 +1,7 @@
 import { initFormBuilder } from './script.js';
 import { loadSavedTheme } from './theme.js';
+import { initForms } from './forms.js';
+import { initSubmissions } from './submissions.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Load the saved theme
@@ -36,48 +38,45 @@ function loadContent(route) {
 
     switch(route) {
         case 'dashboard':
-            fetch('/views/dashboard.html')
-                .then(response => response.text())
-                .then(html => {
-                    mainContent.innerHTML = html;
-                    initializeDashboard();
-                });
+            loadView('dashboard', initializeDashboard);
             break;
         case 'form-builder':
-            fetch('/views/form-builder.html')
-                .then(response => response.text())
-                .then(html => {
-                    mainContent.innerHTML = html;
-                    initializeFormBuilder();
-                });
+            loadView('form-builder', initializeFormBuilder);
             break;
         case 'forms':
-            fetch('/views/forms.html')
-                .then(response => response.text())
-                .then(html => {
-                    mainContent.innerHTML = html;
-                    initializeForms();
-                });
+            loadView('forms', initializeForms);
             break;
         case 'submissions':
-            fetch('/views/submissions.html')
-                .then(response => response.text())
-                .then(html => {
-                    mainContent.innerHTML = html;
-                    initializeSubmissions();
-                });
+            loadView('submissions', initializeSubmissions);
             break;
         case 'settings':
-            fetch('/views/settings.html')
-                .then(response => response.text())
-                .then(html => {
-                    mainContent.innerHTML = html;
-                    initializeSettings();
-                });
+            loadView('settings', initializeSettings);
             break;
         default:
             mainContent.innerHTML = '<h2>404 Not Found</h2><p>The requested page does not exist.</p>';
     }
+}
+
+function loadView(viewName, initFunction) {
+    fetch(`/views/${viewName}.html`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(html => {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = html;
+            if (typeof initFunction === 'function') {
+                initFunction();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading view:', error);
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = '<h2>Error</h2><p>Failed to load the requested page.</p>';
+        });
 }
 
 function initializeDashboard() {
@@ -92,27 +91,17 @@ function initializeFormBuilder() {
 
 function initializeForms() {
     console.log('Forms view initialized');
-    loadForms();
+    initForms();
 }
 
 function initializeSubmissions() {
     console.log('Submissions view initialized');
-    loadSubmissions();
+    initSubmissions();
 }
 
 function initializeSettings() {
     console.log('Settings view initialized');
     setupSettings();
-}
-
-function loadForms() {
-    // Add code to load and display forms
-    console.log('Loading forms...');
-}
-
-function loadSubmissions() {
-    // Add code to load and display submissions
-    console.log('Loading submissions...');
 }
 
 function setupSettings() {
