@@ -72,7 +72,13 @@ function initFormBuilder() {
 
     // Initialize undo/redo functionality
     updateUndoRedoButtons();
+
+    // Render the initial form
+    renderForm();
 }
+
+// Export the initFormBuilder function
+export { initFormBuilder };
 
 // Set up authentication event listeners
 function setupAuthentication() {
