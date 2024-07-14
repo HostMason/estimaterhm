@@ -10,29 +10,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </head>
 <body>
-    <div id="app-container">
-        <nav id="sidebar">
+    <div id="app">
+        <header>
             <h1>Hostmason</h1>
-            <ul id="nav-menu">
-                <li><a href="/dashboard">Dashboard</a></li>
-                <li><a href="/form-builder">Form Builder</a></li>
-                <li><a href="/forms">Forms</a></li>
-                <li><a href="/submissions">Submissions</a></li>
-                <li><a href="/settings">Settings</a></li>
-            </ul>
-        </nav>
+            <nav>
+                <ul>
+                    <li><a href="#dashboard" data-route="dashboard">Dashboard</a></li>
+                    <li><a href="#form-builder" data-route="form-builder">Form Builder</a></li>
+                    <li><a href="#forms" data-route="forms">Forms</a></li>
+                    <li><a href="#submissions" data-route="submissions">Submissions</a></li>
+                    <li><a href="#settings" data-route="settings">Settings</a></li>
+                </ul>
+            </nav>
+        </header>
         <main id="main-content">
-            <div id="content">
-                <!-- Content will be dynamically loaded here -->
-            </div>
+            <!-- Content will be dynamically loaded here -->
         </main>
     </div>
     <script src="/theme.js"></script>
     <script src="/js/main.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            loadSavedTheme();
-        });
-    </script>
 </body>
 </html>

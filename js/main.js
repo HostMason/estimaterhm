@@ -1,58 +1,68 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Set up navigation
-    const navLinks = document.querySelectorAll('#nav-menu a');
+    const navLinks = document.querySelectorAll('nav a');
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            loadContent(this.getAttribute('href'));
+            navigateTo(this.getAttribute('data-route'));
         });
     });
 
-    // Load initial content (dashboard)
-    loadContent('/dashboard');
+    // Handle initial route
+    handleRoute();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleRoute);
 });
 
-function loadContent(url) {
-    fetch(url)
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('content').innerHTML = html;
-            initializeView(url);
-        })
-        .catch(error => console.error('Error loading content:', error));
+function navigateTo(route) {
+    window.location.hash = route;
 }
 
-function initializeView(url) {
-    switch(url) {
-        case '/dashboard':
+function handleRoute() {
+    const route = window.location.hash.slice(1) || 'dashboard';
+    loadContent(route);
+}
+
+function loadContent(route) {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = ''; // Clear current content
+
+    switch(route) {
+        case 'dashboard':
+            mainContent.innerHTML = '<h2>Dashboard</h2><p>Welcome to your dashboard!</p>';
             initializeDashboard();
             break;
-        case '/form-builder':
+        case 'form-builder':
+            mainContent.innerHTML = '<h2>Form Builder</h2><div id="form-builder"></div>';
             initializeFormBuilder();
             break;
-        case '/forms':
+        case 'forms':
+            mainContent.innerHTML = '<h2>Forms</h2><div id="forms-list"></div>';
             initializeForms();
             break;
-        case '/submissions':
+        case 'submissions':
+            mainContent.innerHTML = '<h2>Submissions</h2><div id="submissions-list"></div>';
             initializeSubmissions();
             break;
-        case '/settings':
+        case 'settings':
+            mainContent.innerHTML = '<h2>Settings</h2><div id="settings-panel"></div>';
             initializeSettings();
             break;
+        default:
+            mainContent.innerHTML = '<h2>404 Not Found</h2><p>The requested page does not exist.</p>';
     }
 }
 
 function initializeDashboard() {
     console.log('Dashboard initialized');
-    // Add any dashboard-specific initialization code here
+    // Add dashboard-specific initialization code here
 }
 
 function initializeFormBuilder() {
     console.log('Form Builder initialized');
     // Add form builder initialization code here
-    setupEventListeners();
-    loadSavedState();
-    initSortable();
+    setupFormBuilder();
 }
 
 function initializeForms() {
@@ -67,7 +77,23 @@ function initializeSubmissions() {
 
 function initializeSettings() {
     console.log('Settings view initialized');
-    document.getElementById('settings-btn').addEventListener('click', openSettings);
+    setupSettings();
 }
 
-// Include other necessary functions from script.js here
+function setupFormBuilder() {
+    // Add form builder setup code here
+}
+
+function loadForms() {
+    // Add code to load and display forms
+}
+
+function loadSubmissions() {
+    // Add code to load and display submissions
+}
+
+function setupSettings() {
+    // Add code to setup settings panel
+}
+
+// Add other necessary functions here
