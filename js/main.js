@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', function() {
     loadContent('/dashboard');
 });
 
+// Ensure content is loaded when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadContent('/dashboard');
+});
+
 function loadContent(url) {
     fetch(url)
         .then(response => response.text())
